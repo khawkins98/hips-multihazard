@@ -1,0 +1,130 @@
+/* Toolbar (zoom controls) */
+#toolbar {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  gap: 4px;
+  z-index: 20;
+}
+
+#toolbar button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+#toolbar button:hover {
+  background: var(--bg-elevated);
+}
+
+#toolbar #btn-fit,
+#toolbar #btn-reset {
+  width: auto;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Search */
+#search-container {
+  position: relative;
+}
+
+#search-input {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 5px 12px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  width: 240px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+
+#search-input::placeholder {
+  color: var(--text-dim);
+}
+
+#search-input:focus {
+  border-color: var(--accent);
+}
+
+/* Search results dropdown */
+#search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-top: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  list-style: none;
+  z-index: 200;
+  display: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+#search-results.visible {
+  display: block;
+}
+
+#search-results li {
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+#search-results li:last-child {
+  border-bottom: none;
+}
+
+#search-results li:hover,
+#search-results li.active {
+  background: var(--bg-elevated);
+}
+
+#search-results .result-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+#search-results .result-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#search-results .result-type {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* About button */
+#btn-about {
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  font-size: 12px;
+}

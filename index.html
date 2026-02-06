@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HIPs Multi-Hazard Explorer</title>
+  <link rel="stylesheet" href="/src/styles/main.css" />
+  <link rel="stylesheet" href="/src/styles/sidebar.css" />
+  <link rel="stylesheet" href="/src/styles/detail-panel.css" />
+  <link rel="stylesheet" href="/src/styles/toolbar.css" />
+</head>
+<body>
+  <header id="app-header">
+    <div class="header-left">
+      <h1>HIPs Multi-Hazard Explorer</h1>
+      <span class="header-subtitle">UNDRR/ISC Hazard Information Profiles</span>
+    </div>
+    <div class="header-right">
+      <div id="search-container">
+        <input type="text" id="search-input" placeholder="Search hazards..." autocomplete="off" />
+        <ul id="search-results"></ul>
+      </div>
+      <button id="btn-about" title="About">About</button>
+    </div>
+  </header>
+
+  <main id="app-main">
+    <aside id="sidebar">
+      <section id="filter-section">
+        <h2>Hazard Types</h2>
+        <div id="type-filters"></div>
+      </section>
+
+      <section id="grouping-section">
+        <h2>Grouping</h2>
+        <div id="grouping-controls">
+          <label><input type="radio" name="grouping" value="type" checked /> By Type</label>
+          <label><input type="radio" name="grouping" value="cluster" /> By Cluster</label>
+          <label><input type="radio" name="grouping" value="flat" /> Flat</label>
+        </div>
+      </section>
+
+      <section id="edge-section">
+        <h2>Causal Links</h2>
+        <label id="edge-toggle-label">
+          <input type="checkbox" id="edge-toggle" /> Show all causal links
+        </label>
+      </section>
+
+      <section id="layout-section">
+        <h2>Layout</h2>
+        <div id="layout-controls">
+          <button class="layout-btn active" data-layout="fcose">Force-directed</button>
+          <button class="layout-btn" data-layout="dagre">Hierarchical</button>
+          <button class="layout-btn" data-layout="concentric">Concentric</button>
+        </div>
+      </section>
+
+      <section id="legend-section">
+        <h2>Legend</h2>
+        <div id="legend"></div>
+      </section>
+    </aside>
+
+    <div id="graph-container">
+      <div id="cy"></div>
+      <div id="toolbar">
+        <button id="btn-zoom-in" title="Zoom in">+</button>
+        <button id="btn-zoom-out" title="Zoom out">&minus;</button>
+        <button id="btn-fit" title="Fit to screen">Fit</button>
+        <button id="btn-reset" title="Reset view">Reset</button>
+      </div>
+      <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading 281 hazards...</p>
+      </div>
+    </div>
+
+    <aside id="detail-panel">
+      <div id="detail-placeholder">
+        <p>Click a hazard node to view details</p>
+      </div>
+      <div id="detail-content" class="hidden"></div>
+    </aside>
+  </main>
+
+  <footer id="app-footer">
+    <span>Data from <a href="https://www.preventionweb.net/drr-glossary/hips" target="_blank" rel="noopener">UNDRR/ISC Hazard Information Profiles</a> &middot; CC BY 4.0</span>
+    <span id="snapshot-info"></span>
+  </footer>
+
+  <div id="about-overlay" class="overlay hidden">
+    <div class="overlay-content">
+      <button class="overlay-close">&times;</button>
+      <h2>About</h2>
+      <div id="about-body"></div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

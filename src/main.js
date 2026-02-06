@@ -11,7 +11,10 @@ import { initSearch } from './ui/search.js';
 import { initToolbar } from './ui/toolbar.js';
 import { initLegend } from './ui/legend.js';
 
-// Simple event bus
+/**
+ * Create a simple publish/subscribe event bus for cross-module communication.
+ * @returns {{ on: (event: string, fn: Function) => void, emit: (event: string, data: *) => void }}
+ */
 function createBus() {
   const listeners = {};
   return {
@@ -24,6 +27,10 @@ function createBus() {
   };
 }
 
+/**
+ * Bootstrap the application: fetch data, build graph, wire up UI modules.
+ * Shows a loading overlay during init and displays errors on failure.
+ */
 async function main() {
   const bus = createBus();
   const loading = document.getElementById('loading-overlay');

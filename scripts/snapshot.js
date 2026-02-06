@@ -31,6 +31,10 @@ function toArray(val) {
   return Array.isArray(val) ? val : [val];
 }
 
+/**
+ * Fetch the full HIPs JSON-LD dataset from PreventionWeb, extract hazard nodes
+ * and causal edges, and write the optimized snapshot to public/data/hips.json.
+ */
 async function fetchAndTransform() {
   console.log(`Fetching from ${API_URL}...`);
   const res = await fetch(API_URL);

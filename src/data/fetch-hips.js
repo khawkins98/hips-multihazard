@@ -4,6 +4,10 @@
 const SNAPSHOT_URL = import.meta.env.BASE_URL + 'data/hips.json';
 const API_URL = 'https://www.preventionweb.net/api/terms/hips';
 
+/**
+ * Load HIPs hazard data, trying the local snapshot first and falling back to the live API.
+ * @returns {Promise<{meta: Object, nodes: Array, edges: Array}>} Normalized hazard dataset
+ */
 export async function fetchHipsData() {
   // Try snapshot first
   try {
@@ -29,6 +33,7 @@ export async function fetchHipsData() {
   return transformRawApi(raw);
 }
 
+/** Extract a plain string from a JSON-LD value ({@language, @value} or string). */
 function str(val) {
   if (!val) return '';
   if (typeof val === 'string') return val;
@@ -36,17 +41,25 @@ function str(val) {
   return '';
 }
 
+/** Extract the @id URI from a JSON-LD reference ({@id} or string). */
 function refId(val) {
   if (!val) return null;
   if (typeof val === 'string') return val;
   return val['@id'] || null;
 }
 
+/** Normalize a value to an array (handles null, single value, or existing array). */
 function toArray(val) {
   if (!val) return [];
   return Array.isArray(val) ? val : [val];
 }
 
+/**
+ * Minimal client-side transform of raw JSON-LD API response into the snapshot format.
+ * Used as a fallback when the pre-built snapshot is unavailable.
+ * @param {Object} raw - Raw JSON-LD response from the PreventionWeb API
+ * @returns {{meta: Object, nodes: Array, edges: Array}}
+ */
 function transformRawApi(raw) {
   const graph = raw['@graph'] || raw;
   const nodes = [];

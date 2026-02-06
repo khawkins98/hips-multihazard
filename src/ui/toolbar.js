@@ -46,6 +46,7 @@ export function initToolbar(getCy) {
   });
 }
 
+/** Fill the about overlay with usage instructions, data provenance, and attribution. */
 function populateAbout() {
   const body = document.getElementById('about-body');
   body.innerHTML = `
@@ -75,5 +76,8 @@ function populateAbout() {
     <p>Data from UNDRR/ISC Hazard Information Profiles,
     <a href="https://www.preventionweb.net/drr-glossary/hips" target="_blank" rel="noopener">preventionweb.net</a>,
     licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.</p>
+
+    <h3>Source Code</h3>
+    <p><a href="https://github.com/khawkins98/hips-multihazard" target="_blank" rel="noopener">github.com/khawkins98/hips-multihazard</a></p>
   `;
 }

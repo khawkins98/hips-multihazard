@@ -8,6 +8,8 @@
  * @param {object} bus - Event bus for cross-module communication
  */
 export function setupInteractions(cy, bus) {
+  const tooltip = createTooltip();
+
   // Click on a hazard node
   cy.on('tap', 'node[!isCompound]', (evt) => {
     const node = evt.target;
@@ -35,11 +37,25 @@ export function setupInteractions(cy, bus) {
     }
   });
 
-  // Hover effects
+  // Hover effects + tooltip
   cy.on('mouseover', 'node[!isCompound]', (evt) => {
     const node = evt.target;
     node.style('border-width', 3);
     document.getElementById('cy').style.cursor = 'pointer';
+
+    const d = node.data();
+    const conns = d.connectionCount || 0;
+    tooltip.show(
+      `<strong>${esc(d.label)}</strong><br>` +
+      `<span class="tt-type">${esc(d.typeName)}</span>` +
+      (d.clusterName ? ` · ${esc(d.clusterName)}` : '') +
+      `<br><span class="tt-conns">${conns} causal link${conns !== 1 ? 's' : ''}</span>`,
+      evt.renderedPosition || evt.position
+    );
+  });
+
+  cy.on('mousemove', 'node[!isCompound]', (evt) => {
+    tooltip.move(evt.renderedPosition || evt.position);
   });
 
   cy.on('mouseout', 'node[!isCompound]', (evt) => {
@@ -48,7 +64,37 @@ export function setupInteractions(cy, bus) {
       node.style('border-width', 2);
     }
     document.getElementById('cy').style.cursor = 'default';
+    tooltip.hide();
   });
+}
+
+function createTooltip() {
+  const el = document.createElement('div');
+  el.className = 'graph-tooltip';
+  document.getElementById('graph-container').appendChild(el);
+
+  return {
+    show(html, pos) {
+      el.innerHTML = html;
+      el.style.display = 'block';
+      this.move(pos);
+    },
+    move(pos) {
+      if (!pos) return;
+      el.style.left = (pos.x + 12) + 'px';
+      el.style.top = (pos.y - 10) + 'px';
+    },
+    hide() {
+      el.style.display = 'none';
+    },
+  };
+}
+
+function esc(str) {
+  if (!str) return '';
+  const d = document.createElement('div');
+  d.textContent = String(str);
+  return d.innerHTML;
 }
 
 /**

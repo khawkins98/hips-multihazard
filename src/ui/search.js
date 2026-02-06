@@ -90,6 +90,12 @@ export function initSearch(nodes, eventBus) {
   });
 }
 
+/**
+ * Score and rank all hazard nodes against a search query.
+ * Scoring: exact label=100, starts-with=80, label contains=60, identifier=40, alt label=30.
+ * @param {string} query - Lowercased search term
+ * @returns {Array} Matched nodes sorted by descending score
+ */
 function search(query) {
   return allNodes
     .map(node => {
@@ -110,10 +116,12 @@ function search(query) {
     .sort((a, b) => b.score - a.score);
 }
 
+/** Emit a 'node:focus' event to pan/zoom the graph to the selected search result. */
 function selectResult(nodeId) {
   bus.emit('node:focus', { id: nodeId });
 }
 
+/** Highlight the active dropdown item during keyboard navigation. */
 function updateActive(items, index) {
   items.forEach(li => li.classList.remove('active'));
   if (items[index]) {
@@ -122,6 +130,7 @@ function updateActive(items, index) {
   }
 }
 
+/** Wrap matching substring in <strong> tags for visual emphasis in search results. */
 function highlight(text, query) {
   if (!text) return '';
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -129,6 +138,7 @@ function highlight(text, query) {
   return escHtml(text).replace(re, '<strong>$1</strong>');
 }
 
+/** HTML-escape a string to prevent XSS when building search result markup. */
 function escHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;

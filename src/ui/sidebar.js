@@ -15,6 +15,10 @@ export function initSidebar(data, bus) {
   initLayoutControls(bus);
 }
 
+/**
+ * Build type-filter checkboxes from the data, emitting 'filter:types' on change.
+ * Each checkbox shows the hazard type color swatch, short name, and node count.
+ */
 function initTypeFilters(data, bus) {
   const container = document.getElementById('type-filters');
 
@@ -61,6 +65,7 @@ function initTypeFilters(data, bus) {
   }
 }
 
+/** Bind grouping radio buttons to emit 'grouping:request' events. */
 function initGroupingControls(bus) {
   const radios = document.querySelectorAll('#grouping-controls input[name="grouping"]');
   for (const radio of radios) {
@@ -72,6 +77,7 @@ function initGroupingControls(bus) {
   }
 }
 
+/** Bind the causal-link toggle checkbox to emit 'edges:toggle' events. */
 function initEdgeToggle(bus) {
   const toggle = document.getElementById('edge-toggle');
   toggle.addEventListener('change', () => {
@@ -79,6 +85,7 @@ function initEdgeToggle(bus) {
   });
 }
 
+/** Bind layout buttons (fcose/dagre/concentric) to emit 'layout:change' events. */
 function initLayoutControls(bus) {
   const buttons = document.querySelectorAll('.layout-btn');
   for (const btn of buttons) {

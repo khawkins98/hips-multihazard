@@ -6,6 +6,7 @@ import { getTypeDef } from '../data/hazard-types.js';
 let nodeDataMap = null;
 let bus = null;
 
+/** Maps scope note type keys (from the API's dct:type) to human-readable labels. */
 const SCOPE_NOTE_LABELS = {
   drivers: 'Drivers',
   impacts: 'Impacts',
@@ -28,6 +29,12 @@ export function initDetailPanel(dataMap, eventBus) {
   bus.on('node:deselected', hideDetail);
 }
 
+/**
+ * Render the detail panel for a selected hazard node.
+ * Displays metadata badges, definition, scope notes, causal links, and sources.
+ * Causal link clicks emit 'node:focus' to navigate the graph.
+ * @param {string} nodeId - The @id of the selected hazard node
+ */
 function showDetail(nodeId) {
   const data = nodeDataMap.get(nodeId);
   if (!data) return;
@@ -150,6 +157,7 @@ function showDetail(nodeId) {
   });
 }
 
+/** Hide the detail content and restore the placeholder prompt. */
 function hideDetail() {
   const placeholder = document.getElementById('detail-placeholder');
   const content = document.getElementById('detail-content');
@@ -157,6 +165,12 @@ function hideDetail() {
   content.classList.add('hidden');
 }
 
+/**
+ * HTML-escape a string using the DOM's built-in textContent→innerHTML conversion.
+ * Prevents XSS when interpolating user/API data into innerHTML.
+ * @param {string} str
+ * @returns {string} HTML-safe string
+ */
 function esc(str) {
   if (!str) return '';
   const div = document.createElement('div');
@@ -164,6 +178,7 @@ function esc(str) {
   return div.innerHTML;
 }
 
+/** Shorten a URL to host + truncated path for display in source links. */
 function truncateUrl(url) {
   try {
     const u = new URL(url);

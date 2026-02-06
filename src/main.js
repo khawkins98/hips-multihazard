@@ -48,7 +48,7 @@ async function main() {
     initDetailPanel(nodeDataMap, bus);
     initSearch(data.nodes, bus);
     initToolbar(getCy);
-    initLegend(data.nodes);
+    initLegend(data.nodes, bus);
 
     // 4. Initialize graph
     const cy = initGraph(elements, bus);
@@ -56,8 +56,12 @@ async function main() {
     // 5. Handle grouping changes (requires full re-transform)
     bus.on('grouping:request', ({ mode }) => {
       currentGrouping = mode;
-      const { elements: newElements } = transformToElements(data, mode);
-      bus.emit('grouping:change', { mode, elements: newElements });
+      const result = transformToElements(data, mode);
+      bus.emit('grouping:change', {
+        mode,
+        elements: result.elements,
+        corridorStats: result.corridorStats || null,
+      });
     });
 
     // 6. Handle node focus (from detail panel causal links or search)

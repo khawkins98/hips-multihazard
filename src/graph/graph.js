@@ -6,13 +6,14 @@ import fcose from 'cytoscape-fcose';
 import dagre from 'cytoscape-dagre';
 import { getStylesheet } from './styles.js';
 import { getLayout } from './layouts.js';
-import { setupInteractions } from './interactions.js';
+import { setupInteractions, setInteractionMode } from './interactions.js';
 
 // Register layout extensions
 cytoscape.use(fcose);
 cytoscape.use(dagre);
 
 let cy = null;
+let currentMode = 'type';
 
 /**
  * Initialize the Cytoscape graph.
@@ -44,11 +45,13 @@ export function initGraph(elements, bus) {
 
   // Listen for layout change requests
   bus.on('layout:change', ({ name }) => {
+    if (currentMode === 'corridor') return; // layout locked in corridor mode
     runLayout(name);
   });
 
   // Listen for edge visibility toggle
   bus.on('edges:toggle', ({ visible }) => {
+    if (currentMode === 'corridor') return; // edges always visible in corridor mode
     if (visible) {
       cy.edges().removeClass('hidden');
     } else {
@@ -59,6 +62,28 @@ export function initGraph(elements, bus) {
   // Listen for type filter changes
   bus.on('filter:types', ({ hiddenTypes }) => {
     cy.batch(() => {
+      if (currentMode === 'corridor') {
+        // In corridor mode, hide corridor nodes by fullTypeName
+        cy.nodes('[?isCorridor]').forEach((node) => {
+          if (hiddenTypes.has(node.data('fullTypeName'))) {
+            node.addClass('hidden');
+          } else {
+            node.removeClass('hidden');
+          }
+        });
+        // Hide edges where source or target is hidden
+        cy.edges('[?isCorridor]').forEach((edge) => {
+          const src = cy.getElementById(edge.data('source'));
+          const tgt = cy.getElementById(edge.data('target'));
+          if (src.hasClass('hidden') || tgt.hasClass('hidden')) {
+            edge.addClass('hidden');
+          } else {
+            edge.removeClass('hidden');
+          }
+        });
+        return;
+      }
+
       cy.nodes('[!isCompound]').forEach((node) => {
         const typeName = node.data('typeName');
         if (hiddenTypes.has(typeName)) {
@@ -92,10 +117,18 @@ export function initGraph(elements, bus) {
 
   // Listen for grouping changes
   bus.on('grouping:change', ({ mode, elements: newElements }) => {
+    currentMode = mode;
+    setInteractionMode(mode);
     cy.elements().remove();
     cy.add(newElements);
-    cy.edges().addClass('hidden');
-    runLayout('fcose');
+
+    if (mode === 'corridor') {
+      // Edges always visible in corridor mode
+      runLayout('corridor');
+    } else {
+      cy.edges().addClass('hidden');
+      runLayout('fcose');
+    }
   });
 
   return cy;

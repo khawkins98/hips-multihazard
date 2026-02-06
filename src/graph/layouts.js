@@ -55,6 +55,16 @@ export const layouts = {
     fit: true,
     padding: 30,
   },
+
+  corridor: {
+    name: 'circle',
+    animate: true,
+    animationDuration: 800,
+    spacingFactor: 1.5,
+    startAngle: -Math.PI / 2,
+    fit: true,
+    padding: 60,
+  },
 };
 
 /**

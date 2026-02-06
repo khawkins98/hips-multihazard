@@ -1,5 +1,7 @@
 # HIPs Multi-Hazard Explorer
 
+**[Live demo](https://khawkins98.github.io/hips-multihazard/)**
+
 A network graph of the [UNDRR/ISC Hazard Information Profiles (HIPs)](https://www.preventionweb.net/drr-glossary/hips): 281 hazards, 8 types, 38 clusters, and ~1,648 causal relationships.
 
 ## Overview
@@ -9,6 +11,7 @@ The HIPs describe hazards used in disaster risk reduction. This tool plots the c
 Features:
 - Force-directed, hierarchical, and concentric layouts
 - Group hazards by type, cluster, or flat
+- **Corridor view**: aggregates 1,648 individual causal edges into weighted "hyperspace routes" between the 8 hazard type groups — thicker, brighter lines indicate heavier causal traffic. Inspired by sci-fi hyperspace route maps and the flow-map tradition in thematic cartography.
 - Click a node to highlight its neighborhood and see the full profile
 - Search by name, alternate label, or identifier
 - Filter by hazard type, toggle all causal links on/off
@@ -47,6 +50,12 @@ Data is fetched from the [PreventionWeb HIPs API](https://www.preventionweb.net/
 - Franz, M., Lopes, C.T., Huck, G., Dong, Y., Sumer, O. & Bader, G.D. (2016). "Cytoscape.js: a graph theory library for visualisation and analysis." *Bioinformatics*, 32(2), 309–311.
 - Miles, A. & Bechhofer, S. (2009). "SKOS Simple Knowledge Organization System Reference." *W3C Recommendation*. https://www.w3.org/TR/skos-reference/
 - Cotton, F., Kunz, M., Dottori, F. & Stocker, D. (2023). "Multi-hazard and systemic framework for risk-informed decision making." *EU Horizon Technical Report.*
+
+### Corridor View Inspirations
+
+- Tobler, W.R. (1987). "Experiments in migration mapping by computer." *The American Cartographer*, 14(2), 155–163. (Origin of flow maps as a cartographic technique for showing aggregate movement between regions.)
+- Phan, D., Xiao, L., Yeh, R., Hanrahan, P. & Winograd, T. (2005). "Flow Map Layout." *IEEE Symposium on Information Visualization (InfoVis)*. (Automated layout algorithms for edge-bundled flow maps.)
+- Holten, D. (2006). "Hierarchical Edge Bundling: Visualization of Adjacency Relations in Hierarchical Data." *IEEE Transactions on Visualization and Computer Graphics*, 12(5), 741–748. (Visual technique for aggregating edges between groups in network diagrams.)
 
 ## Attribution
 

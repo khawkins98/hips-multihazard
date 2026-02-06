@@ -133,5 +133,99 @@ export function getStylesheet() {
         'display': 'none',
       },
     },
+
+    // ── Corridor mode ──
+
+    // Corridor meta-nodes (type bubbles)
+    {
+      selector: 'node[?isCorridor]',
+      style: {
+        'label': 'data(label)',
+        'background-color': 'data(color)',
+        'color': '#fff',
+        'text-valign': 'center',
+        'text-halign': 'center',
+        'font-size': '14px',
+        'font-weight': 'bold',
+        'text-wrap': 'wrap',
+        'text-max-width': '90px',
+        'width': 'mapData(hazardCount, 9, 83, 55, 130)',
+        'height': 'mapData(hazardCount, 9, 83, 55, 130)',
+        'border-width': 3,
+        'border-color': '#fff',
+        'text-outline-color': 'data(color)',
+        'text-outline-width': 2,
+        'shadow-blur': 15,
+        'shadow-color': 'data(color)',
+        'shadow-opacity': 0.6,
+        'z-index': 10,
+        'transition-property': 'opacity, border-color, shadow-blur, shadow-opacity',
+        'transition-duration': '200ms',
+      },
+    },
+
+    // Corridor edges (weighted)
+    {
+      selector: 'edge[?isCorridor]',
+      style: {
+        'width': 'mapData(weight, 1, 200, 2, 18)',
+        'line-color': '#5b9cf5',
+        'target-arrow-color': '#5b9cf5',
+        'target-arrow-shape': 'triangle',
+        'curve-style': 'bezier',
+        'arrow-scale': 1.2,
+        'opacity': 'mapData(weight, 1, 200, 0.3, 0.95)',
+        'label': 'data(label)',
+        'font-size': '11px',
+        'color': '#ccc',
+        'text-outline-color': '#1a1a2e',
+        'text-outline-width': 2,
+        'text-rotation': 'autorotate',
+        'shadow-blur': 8,
+        'shadow-color': '#5b9cf5',
+        'shadow-opacity': 0.4,
+        'z-index': 5,
+        'transition-property': 'opacity, line-color, width, shadow-opacity',
+        'transition-duration': '200ms',
+      },
+    },
+
+    // Corridor self-loop edges
+    {
+      selector: 'edge[?selfLoop]',
+      style: {
+        'curve-style': 'loop',
+        'loop-direction': '45deg',
+        'loop-sweep': '60deg',
+      },
+    },
+
+    // Highlighted corridor edge
+    {
+      selector: 'edge[?isCorridor].highlighted',
+      style: {
+        'line-color': '#FFD600',
+        'target-arrow-color': '#FFD600',
+        'shadow-color': '#FFD600',
+        'shadow-opacity': 0.8,
+        'shadow-blur': 15,
+        'opacity': 1,
+        'z-index': 999,
+        'color': '#FFD600',
+      },
+    },
+
+    // Highlighted corridor node
+    {
+      selector: 'node[?isCorridor].highlighted',
+      style: {
+        'border-color': '#FFD600',
+        'border-width': 4,
+        'shadow-color': '#FFD600',
+        'shadow-opacity': 0.8,
+        'shadow-blur': 25,
+        'z-index': 100,
+      },
+    },
   ];
 }

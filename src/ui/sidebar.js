@@ -68,9 +68,23 @@ function initTypeFilters(data, bus) {
 /** Bind grouping radio buttons to emit 'grouping:request' events. */
 function initGroupingControls(bus) {
   const radios = document.querySelectorAll('#grouping-controls input[name="grouping"]');
+  const edgeToggle = document.getElementById('edge-toggle');
+  const edgeLabel = document.getElementById('edge-toggle-label');
+  const layoutBtns = document.querySelectorAll('.layout-btn');
+  const layoutSection = document.getElementById('layout-section');
+  const edgeSection = document.getElementById('edge-section');
+
   for (const radio of radios) {
     radio.addEventListener('change', () => {
       if (radio.checked) {
+        const isCorridor = radio.value === 'corridor';
+
+        // Disable/dim edge toggle and layout buttons in corridor mode
+        edgeToggle.disabled = isCorridor;
+        edgeSection.classList.toggle('disabled-section', isCorridor);
+        layoutBtns.forEach(btn => { btn.disabled = isCorridor; });
+        layoutSection.classList.toggle('disabled-section', isCorridor);
+
         bus.emit('grouping:request', { mode: radio.value });
       }
     });

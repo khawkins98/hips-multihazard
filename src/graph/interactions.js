@@ -2,6 +2,15 @@
  * Graph interaction handlers: tap, hover, neighborhood highlight.
  */
 
+let currentMode = 'type';
+
+/**
+ * Update the current interaction mode (called when grouping changes).
+ */
+export function setInteractionMode(mode) {
+  currentMode = mode;
+}
+
 /**
  * Set up interaction handlers on the Cytoscape instance.
  * @param {object} cy - Cytoscape instance
@@ -10,22 +19,58 @@
 export function setupInteractions(cy, bus) {
   const tooltip = createTooltip();
 
-  // Click on a hazard node
-  cy.on('tap', 'node[!isCompound]', (evt) => {
+  // Click on a hazard node (non-corridor)
+  cy.on('tap', 'node[!isCompound][!isCorridor]', (evt) => {
+    if (currentMode === 'corridor') return;
     const node = evt.target;
     const nodeId = node.id();
 
-    // Clear previous highlights
     clearHighlights(cy);
+    node.select();
+    highlightNeighborhood(cy, node);
+    bus.emit('node:selected', { id: nodeId });
+  });
 
-    // Select this node
+  // Click on a corridor meta-node
+  cy.on('tap', 'node[?isCorridor]', (evt) => {
+    const node = evt.target;
+    clearHighlights(cy);
     node.select();
 
-    // Highlight neighborhood
-    highlightNeighborhood(cy, node);
+    // Dim everything, then highlight this node + its connected edges + neighbors
+    cy.elements().addClass('dimmed');
+    const connectedEdges = node.connectedEdges();
+    const neighbors = connectedEdges.connectedNodes();
 
-    // Emit event for detail panel
-    bus.emit('node:selected', { id: nodeId });
+    node.removeClass('dimmed').addClass('highlighted');
+    neighbors.removeClass('dimmed').addClass('highlighted');
+    connectedEdges.removeClass('dimmed').addClass('highlighted');
+
+    bus.emit('corridor:selected', {
+      type: 'node',
+      typeName: node.data('fullTypeName'),
+      hazardCount: node.data('hazardCount'),
+    });
+  });
+
+  // Click on a corridor edge
+  cy.on('tap', 'edge[?isCorridor]', (evt) => {
+    const edge = evt.target;
+    clearHighlights(cy);
+
+    cy.elements().addClass('dimmed');
+    edge.removeClass('dimmed').addClass('highlighted');
+    edge.source().removeClass('dimmed').addClass('highlighted');
+    edge.target().removeClass('dimmed').addClass('highlighted');
+
+    bus.emit('corridor:selected', {
+      type: 'edge',
+      sourceType: edge.data('sourceFullType'),
+      targetType: edge.data('targetFullType'),
+      sourceName: edge.data('sourceTypeName'),
+      targetName: edge.data('targetTypeName'),
+      weight: edge.data('weight'),
+    });
   });
 
   // Click on background to deselect
@@ -37,8 +82,9 @@ export function setupInteractions(cy, bus) {
     }
   });
 
-  // Hover effects + tooltip
-  cy.on('mouseover', 'node[!isCompound]', (evt) => {
+  // Hover effects + tooltip for regular nodes
+  cy.on('mouseover', 'node[!isCompound][!isCorridor]', (evt) => {
+    if (currentMode === 'corridor') return;
     const node = evt.target;
     node.style('border-width', 3);
     document.getElementById('cy').style.cursor = 'pointer';
@@ -54,15 +100,45 @@ export function setupInteractions(cy, bus) {
     );
   });
 
-  cy.on('mousemove', 'node[!isCompound]', (evt) => {
+  // Hover on corridor node
+  cy.on('mouseover', 'node[?isCorridor]', (evt) => {
+    const node = evt.target;
+    document.getElementById('cy').style.cursor = 'pointer';
+    const d = node.data();
+    tooltip.show(
+      `<strong>${esc(d.label)}</strong><br>` +
+      `<span class="tt-conns">${d.hazardCount} hazard${d.hazardCount !== 1 ? 's' : ''}</span>`,
+      evt.renderedPosition || evt.position
+    );
+  });
+
+  // Hover on corridor edge
+  cy.on('mouseover', 'edge[?isCorridor]', (evt) => {
+    const edge = evt.target;
+    document.getElementById('cy').style.cursor = 'pointer';
+    const d = edge.data();
+    tooltip.show(
+      `<strong>${esc(d.sourceTypeName)} &rarr; ${esc(d.targetTypeName)}</strong><br>` +
+      `<span class="tt-conns">${d.weight} causal link${d.weight !== 1 ? 's' : ''}</span>`,
+      evt.renderedPosition || evt.position
+    );
+  });
+
+  cy.on('mousemove', 'node, edge', (evt) => {
     tooltip.move(evt.renderedPosition || evt.position);
   });
 
-  cy.on('mouseout', 'node[!isCompound]', (evt) => {
+  cy.on('mouseout', 'node[!isCompound][!isCorridor]', (evt) => {
+    if (currentMode === 'corridor') return;
     const node = evt.target;
     if (!node.selected()) {
       node.style('border-width', 2);
     }
+    document.getElementById('cy').style.cursor = 'default';
+    tooltip.hide();
+  });
+
+  cy.on('mouseout', 'node[?isCorridor], edge[?isCorridor]', () => {
     document.getElementById('cy').style.cursor = 'default';
     tooltip.hide();
   });

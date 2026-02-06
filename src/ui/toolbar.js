@@ -50,20 +50,20 @@ export function initToolbar(getCy) {
 function populateAbout() {
   const body = document.getElementById('about-body');
   body.innerHTML = `
-    <h3>About This Project</h3>
-    <p>An interactive visualization of the <strong>Hazard Information Profiles (HIPs)</strong> developed by
-    UNDRR and the International Science Council (ISC). Explore 281 hazards across 8 types and their
-    causal interconnections to understand multi-hazard risk.</p>
+    <h3>About this project</h3>
+    <p>A network graph of the <strong>Hazard Information Profiles (HIPs)</strong> from
+    UNDRR and the International Science Council. Shows 281 hazards across 8 types
+    and the causal links between them.</p>
 
-    <h3>How to Use</h3>
+    <h3>How to use</h3>
     <ul>
-      <li><strong>Click a node</strong> to see its full profile and causal connections</li>
-      <li><strong>Search</strong> by hazard name, alternate label, or identifier</li>
-      <li><strong>Filter</strong> by hazard type using the sidebar checkboxes</li>
-      <li><strong>Toggle causal links</strong> to reveal all directed edges at once</li>
-      <li><strong>Switch layouts</strong> between force-directed, hierarchical, and concentric views</li>
-      <li><strong>Change grouping</strong> to pool hazards by type, cluster, or flat</li>
-      <li>Click linked hazards in the detail panel to navigate the graph</li>
+      <li>Click a node to see its profile and causal connections</li>
+      <li>Search by hazard name, alternate label, or identifier</li>
+      <li>Filter by hazard type using the sidebar checkboxes</li>
+      <li>Toggle causal links to show or hide all edges</li>
+      <li>Switch between force-directed, hierarchical, and concentric layouts</li>
+      <li>Group hazards by type, cluster, or flat</li>
+      <li>Click linked hazards in the detail panel to jump to them</li>
     </ul>
 
     <h3>Data</h3>

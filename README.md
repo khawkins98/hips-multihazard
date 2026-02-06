@@ -1,18 +1,17 @@
 # HIPs Multi-Hazard Explorer
 
-Interactive ontology visualization of the [UNDRR/ISC Hazard Information Profiles (HIPs)](https://www.preventionweb.net/drr-glossary/hips) — 281 hazards, 8 types, 38 clusters, and ~1,648 causal relationships rendered as an explorable network graph.
+A network graph of the [UNDRR/ISC Hazard Information Profiles (HIPs)](https://www.preventionweb.net/drr-glossary/hips): 281 hazards, 8 types, 38 clusters, and ~1,648 causal relationships.
 
 ## Overview
 
-The Hazard Information Profiles provide a standardized, science-based characterization of hazards relevant to disaster risk reduction. This tool visualizes the causal interconnections between hazards (`xkos:causes` / `xkos:causedBy`), helping users understand how one hazard can trigger or amplify another — the core insight of the multi-hazard approach.
+The HIPs describe hazards used in disaster risk reduction. This tool plots the causal links between them (`xkos:causes` / `xkos:causedBy`), so you can see how one hazard triggers or amplifies another.
 
-**Features:**
-- Force-directed, hierarchical, and concentric graph layouts
-- Compound node grouping by hazard type and cluster
-- Click-to-explore neighborhood highlighting
-- Full hazard detail panels with scope notes, definitions, and provenance
-- Typeahead search across names, alt labels, and identifiers
-- Type filtering and causal link toggle
+Features:
+- Force-directed, hierarchical, and concentric layouts
+- Group hazards by type, cluster, or flat
+- Click a node to highlight its neighborhood and see the full profile
+- Search by name, alternate label, or identifier
+- Filter by hazard type, toggle all causal links on/off
 
 ## Setup
 

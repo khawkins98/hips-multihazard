@@ -112,6 +112,34 @@ a:hover {
   background: var(--bg);
 }
 
+/* Node tooltip */
+.graph-tooltip {
+  display: none;
+  position: absolute;
+  pointer-events: none;
+  z-index: 30;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  max-width: 260px;
+  white-space: nowrap;
+}
+
+.graph-tooltip .tt-type {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.graph-tooltip .tt-conns {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
 #cy {
   width: 100%;
   height: 100%;

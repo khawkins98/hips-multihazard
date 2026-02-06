@@ -1,0 +1,147 @@
+/* Sidebar panel */
+#sidebar {
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#sidebar section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#sidebar h2 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Type filter checkboxes */
+#type-filters label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.15s;
+}
+
+#type-filters label:hover {
+  background: var(--bg-elevated);
+}
+
+.type-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.type-count {
+  margin-left: auto;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+/* Grouping radios */
+#grouping-controls label {
+  display: flex;
+  align-items: center;
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#grouping-controls label:hover {
+  background: var(--bg-elevated);
+}
+
+/* Edge toggle */
+#edge-toggle-label {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+}
+
+#edge-toggle-label:hover {
+  background: var(--bg-elevated);
+}
+
+/* Layout controls */
+#layout-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.layout-btn {
+  text-align: left;
+  padding: 5px 8px;
+  font-size: 12px;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.layout-btn:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border);
+}
+
+.layout-btn.active {
+  background: var(--bg-elevated);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Legend */
+#legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-edge {
+  width: 20px;
+  height: 2px;
+  background: #999;
+  position: relative;
+}
+
+.legend-edge::after {
+  content: '';
+  position: absolute;
+  right: -3px;
+  top: -3px;
+  border-left: 6px solid #999;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+
+.legend-node {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+}

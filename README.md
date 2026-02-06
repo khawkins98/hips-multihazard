@@ -55,4 +55,6 @@ Data from UNDRR/ISC Hazard Information Profiles, [preventionweb.net](https://www
 
 ## License
 
-MIT
+Apache 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+Hazard data is sourced from UNDRR/ISC and subject to [PreventionWeb terms of use](https://www.preventionweb.net/terms-and-conditions-use-preventionweb).

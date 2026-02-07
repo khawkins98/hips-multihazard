@@ -193,6 +193,31 @@ export function getStylesheet() {
       },
     },
 
+    // Path finder: nodes on the shortest path
+    {
+      selector: 'node.path-step',
+      style: {
+        'border-width': 3,
+        'border-color': '#4CAF50',
+        'opacity': 1,
+        'z-index': 100,
+        'text-opacity': 1,
+        'min-zoomed-font-size': 0,
+      },
+    },
+
+    // Path finder: edges on the shortest path
+    {
+      selector: 'edge.path-highlighted',
+      style: {
+        'width': 4,
+        'line-color': '#4CAF50',
+        'target-arrow-color': '#4CAF50',
+        'opacity': 1,
+        'z-index': 999,
+      },
+    },
+
     // Dimmed elements (when a node is selected, others dim)
     {
       selector: '.dimmed',

@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="/src/styles/detail-panel.css" />
   <link rel="stylesheet" href="/src/styles/toolbar.css" />
   <link rel="stylesheet" href="/src/styles/insights.css" />
+  <link rel="stylesheet" href="/src/styles/path-finder.css" />
+  <link rel="stylesheet" href="/src/styles/flow-matrix.css" />
 </head>
 <body>
   <header id="app-header">
@@ -47,8 +49,31 @@
           <input type="checkbox" id="edge-toggle" checked /> Show all causal links
         </label>
         <label id="edge-declared-label">
-          <input type="checkbox" id="edge-declared-toggle" /> Declared only
+          <input type="checkbox" id="edge-declared-toggle" /> Declared only <span class="info-tip" aria-label="What does declared mean?">?<span class="info-tip-content">Declared links are confirmed by both endpoints (A causes B <em>and</em> B lists A). Inferred links are one-sided mentions. <a href="https://github.com/khawkins98/hips-multihazard#methodology-declared-vs-inferred-connections" target="_blank" rel="noopener">Learn more</a></span></span>
         </label>
+      </section>
+
+      <section id="pathfinder-section">
+        <h2>Shortest Path</h2>
+        <button id="pathfinder-toggle">Find Path</button>
+        <div class="pathfinder-inputs">
+          <input type="text" id="pathfinder-source" placeholder="Source node..." readonly />
+          <input type="text" id="pathfinder-target" placeholder="Target node..." readonly />
+        </div>
+        <span id="pathfinder-status"></span>
+        <button id="pathfinder-clear">Clear</button>
+      </section>
+
+      <section id="centrality-section">
+        <h2>Centrality</h2>
+        <div class="centrality-list hidden">
+          <select id="centrality-metric-select">
+            <option value="betweenness">Betweenness</option>
+            <option value="pageRank">PageRank</option>
+            <option value="closeness">Closeness</option>
+          </select>
+          <ul></ul>
+        </div>
       </section>
 
       <section id="layout-section">
@@ -93,6 +118,7 @@
     <span>Data from <a href="https://www.preventionweb.net/drr-glossary/hips" target="_blank" rel="noopener">UNDRR/ISC Hazard Information Profiles</a> &middot; CC BY 4.0</span>
     <span id="footer-actions">
       <button id="btn-insights">Insights</button>
+      <button id="btn-flow-matrix">Flow Matrix</button>
     </span>
     <span id="snapshot-info"></span>
   </footer>
@@ -102,6 +128,15 @@
       <button class="overlay-close">&times;</button>
       <h2>About</h2>
       <div id="about-body"></div>
+    </div>
+  </div>
+
+  <div id="flow-overlay" class="overlay hidden">
+    <div class="overlay-content">
+      <button class="overlay-close">&times;</button>
+      <h2>Type-to-Type Flow Matrix</h2>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Directed causal edge counts between hazard types. Click a cell to highlight those edges on the graph.</p>
+      <div id="flow-body"></div>
     </div>
   </div>
 

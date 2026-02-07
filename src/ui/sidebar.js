@@ -112,6 +112,81 @@ function initEdgeToggle(bus) {
   });
 }
 
+/**
+ * Initialize centrality ranking section in the sidebar.
+ * @param {object} bus - Event bus
+ */
+export function initCentralityRanking(bus) {
+  const section = document.getElementById('centrality-section');
+  if (!section) return;
+
+  const header = section.querySelector('h2');
+  const listContainer = section.querySelector('.centrality-list');
+  const select = section.querySelector('#centrality-metric-select');
+
+  // Collapsible toggle
+  let collapsed = true;
+  listContainer.classList.add('hidden');
+  header.style.cursor = 'pointer';
+  header.addEventListener('click', () => {
+    collapsed = !collapsed;
+    listContainer.classList.toggle('hidden', collapsed);
+    header.classList.toggle('expanded', !collapsed);
+  });
+
+  let currentMetrics = null;
+  let currentNodeDataMap = null;
+
+  bus.on('centrality:computed', ({ metrics, nodeDataMap }) => {
+    currentMetrics = metrics;
+    currentNodeDataMap = nodeDataMap;
+    renderList();
+  });
+
+  select.addEventListener('change', renderList);
+
+  function renderList() {
+    if (!currentMetrics) return;
+    const metricKey = select.value;
+    const rankKey = metricKey + 'Rank';
+
+    // Sort by rank, take top 20
+    const sorted = [...currentMetrics.entries()]
+      .sort((a, b) => a[1][rankKey] - b[1][rankKey])
+      .slice(0, 20);
+
+    const ul = listContainer.querySelector('ul');
+    ul.innerHTML = sorted.map(([id, m]) => {
+      const nodeData = currentNodeDataMap?.get(id);
+      const label = nodeData?.label || id;
+      const typeDef = getTypeDef(nodeData?.typeName);
+      const color = typeDef.color;
+      const rank = m[rankKey];
+      const value = m[metricKey].toFixed(4);
+      return `<li class="centrality-item" data-node-id="${esc(id)}">
+        <span class="centrality-item-rank">${rank}</span>
+        <span class="centrality-item-swatch" style="background:${color}"></span>
+        <span class="centrality-item-label">${esc(label)}</span>
+        <span class="centrality-item-value">${value}</span>
+      </li>`;
+    }).join('');
+
+    // Click to focus node
+    ul.querySelectorAll('.centrality-item').forEach(li => {
+      li.addEventListener('click', () => {
+        bus.emit('node:focus', { id: li.dataset.nodeId });
+      });
+    });
+  }
+
+  function esc(str) {
+    if (!str) return '';
+    const d = document.createElement('div');
+    d.textContent = String(str);
+    return d.innerHTML;
+  }
+}
+
 /** Bind layout buttons (fcose/dagre/concentric) to emit 'layout:change' events. */
 function initLayoutControls(bus) {
   const buttons = document.querySelectorAll('.layout-btn');

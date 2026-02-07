@@ -7,6 +7,10 @@ let nodeDataMap = null;
 let bus = null;
 /** @type {Map<string, Set<string>>} targetId -> Set of sourceIds that declare "I cause targetId" */
 let incomingByTarget = null;
+let currentHops = 1;
+let currentNodeId = null;
+/** @type {Map<string, object>|null} centrality metrics map */
+let centralityData = null;
 
 /** Maps scope note type keys (from the API's dct:type) to human-readable labels. */
 const SCOPE_NOTE_LABELS = {
@@ -35,12 +39,30 @@ export function initDetailPanel(dataMap, edges, eventBus) {
     incomingByTarget.get(e.target).add(e.source);
   }
 
-  bus.on('node:selected', ({ id }) => showDetail(id));
-  bus.on('node:deselected', hideDetail);
-
-  bus.on('grouping:change', () => {
+  bus.on('node:selected', ({ id }) => {
+    currentHops = 1;
+    currentNodeId = id;
+    showDetail(id);
+  });
+  bus.on('node:deselected', () => {
+    currentHops = 1;
+    currentNodeId = null;
     hideDetail();
   });
+
+  bus.on('grouping:change', () => {
+    currentHops = 1;
+    currentNodeId = null;
+    hideDetail();
+  });
+}
+
+/**
+ * Set centrality metrics data for display in detail panel.
+ * @param {Map<string, object>} metrics
+ */
+export function setCentralityData(metrics) {
+  centralityData = metrics;
 }
 
 /**
@@ -70,12 +92,47 @@ function showDetail(nodeId) {
         ${data.clusterName ? `<a class="badge badge-cluster" href="${hipsBase}#${esc(typeSlug)}" target="_blank" rel="noopener">${esc(data.clusterName)}</a>` : ''}
         ${data.id?.startsWith('http') ? `<a class="badge badge-id" href="${esc(data.id)}" target="_blank" rel="noopener">${esc(data.identifier || data.id)}</a>` : (data.identifier ? `<span class="badge badge-id">${esc(data.identifier)}</span>` : '')}
       </div>
+      <div class="khop-controls">
+        <span class="khop-label">Neighborhood:</span>
+        ${[1, 2, 3, 4].map(h =>
+          `<button class="khop-btn${currentHops === h ? ' active' : ''}" data-hops="${h}">${h}-hop</button>`
+        ).join('')}
+      </div>
     </div>
   `;
 
   // Alt labels
   if (data.altLabels?.length) {
     html += `<div class="alt-labels">${data.altLabels.map(l => `<span class="alt-label">${esc(l)}</span>`).join('')}</div>`;
+  }
+
+  // Centrality metrics
+  if (centralityData) {
+    const metrics = centralityData.get(data.id);
+    if (metrics) {
+      html += `
+        <div class="centrality-section">
+          <h3>Centrality</h3>
+          <div class="centrality-metrics">
+            <div class="centrality-metric">
+              <span class="centrality-name">Betweenness</span>
+              <span class="centrality-value">${metrics.betweenness.toFixed(4)}</span>
+              <span class="centrality-rank">#${metrics.betweennessRank}</span>
+            </div>
+            <div class="centrality-metric">
+              <span class="centrality-name">PageRank</span>
+              <span class="centrality-value">${metrics.pageRank.toFixed(4)}</span>
+              <span class="centrality-rank">#${metrics.pageRankRank}</span>
+            </div>
+            <div class="centrality-metric">
+              <span class="centrality-name">Closeness</span>
+              <span class="centrality-value">${metrics.closeness.toFixed(4)}</span>
+              <span class="centrality-rank">#${metrics.closenessRank}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
   }
 
   // Definition
@@ -193,6 +250,18 @@ function showDetail(nodeId) {
     el.addEventListener('click', () => {
       const targetId = el.dataset.nodeId;
       bus.emit('node:focus', { id: targetId });
+    });
+  });
+
+  // Attach click handlers for k-hop buttons
+  content.querySelectorAll('.khop-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const hops = parseInt(btn.dataset.hops, 10);
+      currentHops = hops;
+      // Update active state
+      content.querySelectorAll('.khop-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      bus.emit('khop:change', { nodeId: data.id, hops });
     });
   });
 }

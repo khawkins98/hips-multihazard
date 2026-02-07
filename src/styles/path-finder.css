@@ -1,0 +1,69 @@
+/* Path Finder sidebar section */
+#pathfinder-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#pathfinder-toggle {
+  text-align: left;
+  padding: 5px 8px;
+  font-size: 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+#pathfinder-toggle:hover {
+  background: var(--bg-elevated);
+  border-color: var(--accent);
+}
+
+#pathfinder-toggle.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.pathfinder-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pathfinder-inputs input {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 11px;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  cursor: default;
+}
+
+.pathfinder-inputs input::placeholder {
+  color: var(--text-dim);
+}
+
+#pathfinder-status {
+  font-size: 11px;
+  color: var(--accent);
+  min-height: 16px;
+}
+
+#pathfinder-clear {
+  text-align: left;
+  padding: 3px 8px;
+  font-size: 11px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+#pathfinder-clear:hover {
+  color: var(--text);
+  background: var(--bg-elevated);
+}

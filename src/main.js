@@ -5,13 +5,16 @@ import { fetchHipsData } from './data/fetch-hips.js';
 import { transformToElements } from './data/transform.js';
 import { initGraph, getCy } from './graph/graph.js';
 import { focusNode } from './graph/interactions.js';
-import { initSidebar } from './ui/sidebar.js';
-import { initDetailPanel } from './ui/detail-panel.js';
+import { initSidebar, initCentralityRanking } from './ui/sidebar.js';
+import { initDetailPanel, setCentralityData } from './ui/detail-panel.js';
 import { initSearch } from './ui/search.js';
 import { initToolbar } from './ui/toolbar.js';
 import { initLegend } from './ui/legend.js';
 import { computeInsights } from './data/insights.js';
 import { initInsights } from './ui/insights.js';
+import { computeCentrality } from './data/centrality.js';
+import { initPathFinder } from './ui/path-finder.js';
+import { initFlowMatrix } from './ui/flow-matrix.js';
 
 /**
  * Create a simple publish/subscribe event bus for cross-module communication.
@@ -61,6 +64,20 @@ async function main() {
     // 6. Initialize insights drawer
     initInsights(insights, data, bus);
 
+    // 6b. Initialize path finder
+    initPathFinder(bus, getCy);
+
+    // 6d. Initialize centrality ranking section
+    initCentralityRanking(bus);
+
+    // 6e. Initialize flow matrix
+    initFlowMatrix(data, bus);
+
+    // 6f. Compute centrality metrics
+    const centralityMetrics = computeCentrality(cy);
+    setCentralityData(centralityMetrics);
+    bus.emit('centrality:computed', { metrics: centralityMetrics, nodeDataMap });
+
     // 7. Handle grouping changes (requires full re-transform)
     bus.on('grouping:request', ({ mode }) => {
       currentGrouping = mode;
@@ -69,6 +86,12 @@ async function main() {
         mode,
         elements: result.elements,
       });
+      // Recompute centrality after elements are replaced
+      setTimeout(() => {
+        const newMetrics = computeCentrality(cy);
+        setCentralityData(newMetrics);
+        bus.emit('centrality:computed', { metrics: newMetrics, nodeDataMap });
+      }, 100);
     });
 
     // 8. Handle node focus (from detail panel causal links or search)

@@ -7,7 +7,7 @@ import dagre from 'cytoscape-dagre';
 import { getStylesheet } from './styles.js';
 import { getLayout, getFcoseLayout } from './layouts.js';
 import { getHyperspaceLayout, initHyperRouteLabels } from './hyperspace-layout.js';
-import { setupInteractions } from './interactions.js';
+import { setupInteractions, highlightKHopNeighborhood } from './interactions.js';
 import { initSemanticZoom } from './semantic-zoom.js';
 
 // Register layout extensions
@@ -64,7 +64,7 @@ export function initGraph(elements, bus) {
   bus.on('hyperroute:highlight', ({ route }) => {
     if (!route) {
       // Clear highlight
-      cy.elements().removeClass('dimmed highlighted highlight-hidden');
+      cy.elements().removeClass('dimmed highlighted highlight-hidden path-step path-highlighted');
       return;
     }
     // Dim all nodes, hide all edges, then show only route's edges and bridge nodes
@@ -87,10 +87,18 @@ export function initGraph(elements, bus) {
     });
   });
 
+  // Listen for k-hop neighborhood changes
+  bus.on('khop:change', ({ nodeId, hops }) => {
+    const node = cy.getElementById(nodeId);
+    if (node && !node.empty()) {
+      highlightKHopNeighborhood(cy, node, hops);
+    }
+  });
+
   // Listen for insight highlight requests
   bus.on('insight:highlight', ({ nodeIds, edgeFilter, clear }) => {
     if (clear) {
-      cy.elements().removeClass('dimmed highlighted highlight-hidden');
+      cy.elements().removeClass('dimmed highlighted highlight-hidden path-step path-highlighted');
       return;
     }
     const idSet = new Set(nodeIds || []);
@@ -133,6 +141,35 @@ export function initGraph(elements, bus) {
           }
         });
       }
+    });
+  });
+
+  // Listen for flow matrix highlight requests
+  bus.on('flow:highlight', ({ edges: flowEdges, clear }) => {
+    if (clear) {
+      cy.elements().removeClass('dimmed highlighted highlight-hidden path-step path-highlighted');
+      return;
+    }
+    const sourceTargetSet = new Set(flowEdges.map(e => `${e.source}→${e.target}`));
+    cy.batch(() => {
+      cy.nodes().addClass('dimmed');
+      cy.edges().addClass('highlight-hidden');
+      cy.edges().forEach(edge => {
+        const key = `${edge.data('source')}→${edge.data('target')}`;
+        if (sourceTargetSet.has(key)) {
+          edge.removeClass('highlight-hidden').addClass('highlighted');
+          const src = cy.getElementById(edge.data('source'));
+          const tgt = cy.getElementById(edge.data('target'));
+          if (src && !src.empty()) {
+            src.removeClass('dimmed').addClass('highlighted');
+            src.ancestors().removeClass('dimmed');
+          }
+          if (tgt && !tgt.empty()) {
+            tgt.removeClass('dimmed').addClass('highlighted');
+            tgt.ancestors().removeClass('dimmed');
+          }
+        }
+      });
     });
   });
 

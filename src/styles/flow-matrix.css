@@ -1,0 +1,123 @@
+/* Flow Matrix button active state */
+#btn-flow-matrix.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+
+/* Flow Matrix overlay */
+#flow-overlay .overlay-content {
+  max-width: 700px;
+  width: 95vw;
+}
+
+#flow-body {
+  overflow-x: auto;
+}
+
+/* Table */
+.flow-table {
+  border-collapse: collapse;
+  font-size: 11px;
+  width: 100%;
+}
+
+.flow-table th,
+.flow-table td {
+  padding: 4px 6px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+/* Corner cell */
+.flow-corner {
+  background: transparent;
+  border: none;
+}
+
+/* Column headers - rotated */
+.flow-col-header {
+  height: 90px;
+  white-space: nowrap;
+  vertical-align: bottom;
+  padding-bottom: 8px;
+}
+
+.flow-col-label {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  transform: rotate(-45deg);
+  transform-origin: left bottom;
+  width: max-content;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Row headers */
+.flow-row-header {
+  text-align: right;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding-right: 8px;
+}
+
+/* Color swatches */
+.flow-swatch {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* Data cells */
+.flow-cell {
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--text);
+  min-width: 36px;
+  transition: outline 0.1s, box-shadow 0.1s;
+}
+
+.flow-cell:hover {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  z-index: 1;
+  position: relative;
+}
+
+.flow-cell.active {
+  outline: 2px solid #FFD600;
+  outline-offset: -2px;
+  box-shadow: 0 0 8px rgba(255, 214, 0, 0.3);
+  z-index: 2;
+  position: relative;
+}
+
+/* Diagonal cells (intra-type) */
+.flow-diag {
+  border-style: dashed;
+}
+
+/* Totals */
+.flow-total {
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--bg-elevated);
+  font-size: 10px;
+}
+
+.flow-total-header {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--bg-elevated);
+}
+
+.flow-grand-total {
+  color: var(--accent);
+}

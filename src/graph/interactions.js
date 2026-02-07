@@ -1,6 +1,7 @@
 /**
  * Graph interaction handlers: tap, hover, neighborhood highlight.
  */
+import { isPathfinderActive } from '../ui/path-finder.js';
 
 /**
  * Set up interaction handlers on the Cytoscape instance.
@@ -14,6 +15,12 @@ export function setupInteractions(cy, bus) {
   cy.on('tap', 'node[!isCompound]', (evt) => {
     const node = evt.target;
     const nodeId = node.id();
+
+    // If pathfinder mode is active, route to pathfinder instead
+    if (isPathfinderActive()) {
+      bus.emit('pathfinder:select', { id: nodeId, label: node.data('label') });
+      return;
+    }
 
     clearHighlights(cy);
     node.select();
@@ -102,34 +109,71 @@ function esc(str) {
 }
 
 /**
- * Highlight a node's direct causal neighborhood.
- * Connected edges are highlighted; unrelated edges are hidden; other nodes are dimmed.
+ * Highlight a node's k-hop causal neighborhood.
+ * Iteratively expands frontier `hops` times via connectedEdges/connectedNodes.
+ * Only shows edges where both endpoints are in the visited set.
+ * @param {object} cy - Cytoscape instance
+ * @param {object} node - Starting node
+ * @param {number} [hops=1] - Number of hops to expand
  */
-export function highlightNeighborhood(cy, node) {
+export function highlightKHopNeighborhood(cy, node, hops = 1) {
   clearHighlights(cy);
 
-  const connectedEdges = node.connectedEdges();
-  const neighbors = connectedEdges.connectedNodes();
+  // BFS expansion: collect all nodes within `hops` distance
+  const visited = new Set();
+  visited.add(node.id());
+  let frontier = cy.collection().merge(node);
 
-  // Dim all nodes, hide all edges
-  cy.nodes().addClass('dimmed');
-  cy.edges().addClass('highlight-hidden');
+  for (let i = 0; i < hops; i++) {
+    const nextFrontier = cy.collection();
+    frontier.forEach(n => {
+      const edges = n.connectedEdges();
+      const neighbors = edges.connectedNodes();
+      neighbors.forEach(nb => {
+        if (!nb.data('isCompound') && !visited.has(nb.id())) {
+          visited.add(nb.id());
+          nextFrontier.merge(nb);
+        }
+      });
+    });
+    if (nextFrontier.empty()) break;
+    frontier = nextFrontier;
+  }
 
-  // Un-dim the selected node, its neighbors; show connected edges
-  node.removeClass('dimmed').addClass('highlighted');
-  neighbors.removeClass('dimmed').addClass('highlighted');
-  connectedEdges.removeClass('highlight-hidden').addClass('highlighted');
+  cy.batch(() => {
+    // Dim all, hide all edges
+    cy.nodes().addClass('dimmed');
+    cy.edges().addClass('highlight-hidden');
 
-  // Also un-dim compound parents
-  node.ancestors().removeClass('dimmed');
-  neighbors.ancestors().removeClass('dimmed');
+    // Un-dim all visited nodes
+    for (const id of visited) {
+      const n = cy.getElementById(id);
+      if (n && !n.empty()) {
+        n.removeClass('dimmed').addClass('highlighted');
+        n.ancestors().removeClass('dimmed');
+      }
+    }
+    // Show edges where both endpoints are visited
+    cy.edges().forEach(edge => {
+      if (visited.has(edge.data('source')) && visited.has(edge.data('target'))) {
+        edge.removeClass('highlight-hidden').addClass('highlighted');
+      }
+    });
+  });
+}
+
+/**
+ * Highlight a node's direct causal neighborhood (convenience wrapper for 1-hop).
+ */
+export function highlightNeighborhood(cy, node) {
+  highlightKHopNeighborhood(cy, node, 1);
 }
 
 /**
  * Clear all highlight/dim/hidden classes.
  */
 export function clearHighlights(cy) {
-  cy.elements().removeClass('dimmed highlighted highlight-hidden');
+  cy.elements().removeClass('dimmed highlighted highlight-hidden path-step path-highlighted');
 }
 
 /**

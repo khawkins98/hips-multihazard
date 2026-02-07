@@ -23,13 +23,13 @@ No test framework is configured.
 
 **Data pipeline:** Build-time snapshot (`scripts/snapshot.js`) fetches PreventionWeb's JSON-LD API, normalizes it, and writes `public/data/hips.json` (~1.1 MB). At runtime, `src/data/fetch-hips.js` loads the snapshot (falling back to live API), and `src/data/transform.js` converts it to Cytoscape elements with three grouping modes (type/cluster/flat).
 
-**Module communication:** A simple event bus (pub/sub) created in `src/main.js` decouples modules. Key events: `filter:types`, `grouping:request`, `grouping:change`, `edges:toggle`, `layout:change`, `node:selected`, `node:deselected`, `node:focus`.
+**Module communication:** A simple event bus (pub/sub) created in `src/main.js` decouples modules. Key events: `filter:types`, `grouping:request`, `grouping:change`, `edges:toggle`, `layout:change`, `node:selected`, `node:deselected`, `node:focus`, `khop:change`, `centrality:computed`, `pathfinder:mode`, `pathfinder:select`, `pathfinder:result`, `pathfinder:clear`, `flow:highlight`, `insight:highlight`.
 
 **Source layout:**
-- `src/data/` — data fetching, JSON-LD→Cytoscape transform, hazard type definitions (colors/icons)
-- `src/graph/` — Cytoscape init, interaction handlers (click/hover/highlight), layout configs, stylesheet
-- `src/ui/` — sidebar (filters/grouping/layout controls), detail panel, typeahead search, toolbar (zoom/about), legend
-- `src/styles/` — CSS organized by component (main, sidebar, detail-panel, toolbar)
+- `src/data/` — data fetching, JSON-LD→Cytoscape transform, hazard type definitions (colors/icons), centrality computation, flow matrix computation, network insights
+- `src/graph/` — Cytoscape init, interaction handlers (click/hover/k-hop highlight), layout configs, stylesheet
+- `src/ui/` — sidebar (filters/grouping/layout/centrality ranking), detail panel (with k-hop controls and centrality metrics), typeahead search, toolbar (zoom/about), legend, path finder, flow matrix panel, insights panel
+- `src/styles/` — CSS organized by component (main, sidebar, detail-panel, toolbar, insights, path-finder, flow-matrix)
 
 ## Key Data Format Notes
 
@@ -48,6 +48,7 @@ GitHub Pages via `.github/workflows/deploy.yml`. Triggers on push to `main`. Bas
 ## Conventions
 
 - All modules export init functions (e.g., `initGraph`, `initSidebar`) called from `src/main.js`
-- XSS prevention: use the `esc()` function in `src/ui/detail-panel.js` when inserting user-facing data into HTML
+- XSS prevention: use the `esc()` function (replicated in each UI module) when inserting user-facing data into HTML
 - Cytoscape batch updates (`cy.batch()`) for bulk element changes to avoid layout thrashing
 - Dark theme using CSS custom properties (`--bg`, `--text`, `--accent`, etc.) defined in `src/styles/main.css`
+- Floating panels (flow matrix, insights) use a draggable title bar pattern with `setupDrag()`, CSS `resize: both`, and `.hidden` class toggle — not modal overlays

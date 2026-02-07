@@ -17,6 +17,16 @@ Features:
 - Filter by hazard type, toggle all causal links on/off
 - **Declared-only mode**: filter edges to show only mutually acknowledged relationships, with the layout recomputing to reflect the reduced edge set
 
+### Research Tools
+
+- **K-hop neighborhood expansion**: after selecting a node, expand the visible neighborhood to 2, 3, or 4 hops to trace cascading causal chains
+- **Centrality metrics**: betweenness, PageRank, and closeness centrality computed for all nodes, shown in the detail panel with ranks and as a sortable top-20 sidebar list
+- **Shortest path finder**: select two nodes to find and highlight the shortest directed causal path between them using Dijkstra's algorithm
+- **Type-to-type flow matrix**: an 8x8 heatmap showing directed causal edge counts between hazard types; click a cell to highlight those edges on the graph. Exportable as CSV.
+- **Insights panel**: nine network-statistics cards (average degree, most connected node, cross-type edge ratio, reciprocation rate, etc.) that highlight the relevant subgraph on click
+
+The flow matrix and insights panels are draggable, resizable floating tool palettes that stay open while you interact with the graph.
+
 ## Setup
 
 ```bash

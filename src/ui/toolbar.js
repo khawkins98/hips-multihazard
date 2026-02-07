@@ -43,10 +43,25 @@ export function initToolbar(getCy) {
 
   populateAbout();
 
-  aboutBtn?.addEventListener('click', () => overlay.classList.remove('hidden'));
-  closeBtn?.addEventListener('click', () => overlay.classList.add('hidden'));
+  aboutBtn?.addEventListener('click', () => {
+    overlay.classList.remove('hidden');
+    closeBtn?.focus();
+  });
+  closeBtn?.addEventListener('click', () => {
+    overlay.classList.add('hidden');
+    aboutBtn?.focus();
+  });
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) overlay.classList.add('hidden');
+    if (e.target === overlay) {
+      overlay.classList.add('hidden');
+      aboutBtn?.focus();
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !overlay.classList.contains('hidden')) {
+      overlay.classList.add('hidden');
+      aboutBtn?.focus();
+    }
   });
 }
 

@@ -15,6 +15,7 @@ Features:
 - Click a node to highlight its neighborhood and see the full profile
 - Search by name, alternate label, or identifier
 - Filter by hazard type, toggle all causal links on/off
+- **Declared-only mode**: filter edges to show only mutually acknowledged relationships, with the layout recomputing to reflect the reduced edge set
 
 ## Setup
 
@@ -33,6 +34,17 @@ Data is fetched from the [PreventionWeb HIPs API](https://www.preventionweb.net/
 - **XKOS** (eXtended KOS) for causal relationships
 - **Dublin Core** for metadata and provenance
 - **PROV-O** for source attribution
+
+## Methodology: Declared vs Inferred Connections
+
+The HIPs ontology stores causal relationships using `xkos:causes` and `xkos:causedBy` predicates. Although XKOS defines these as inverse properties, the dataset does not enforce symmetry: node A may declare `causes: [B]` without node B listing A in its `causedBy` array. This creates two categories of causal connections, reflecting editorial coverage rather than causal strength:
+
+- **Declared** (reciprocated) — the relationship is attested by both endpoints. The source lists the target in `causes` *and* the target lists the source in `causedBy`, or vice versa.
+- **Inferred** (unreciprocated) — the relationship is attested by only one side. Another node declares `causes: [thisNode]`, but this node's `causedBy` array does not acknowledge it. No algorithmic inference is performed; the term refers to the edge being observable in the graph without mutual acknowledgment.
+
+All edges are built from `xkos:causes` declarations, so every edge has at least one editorial attestation. The detail panel and sidebar "Declared only" toggle distinguish the two categories so users can gauge which links have cross-validated editorial support. When the declared-only filter is active, the graph layout recomputes to reflect the reduced edge set, revealing the structural difference between the reciprocated causal network and the full graph. The "Most connected" insight card shows total graph degree alongside the declared count for the same reason.
+
+For example, TL0405 (Road Traffic Accident) has 24 declared connections (7 causes + 17 causedBy) but a graph degree of 63, because 39 additional nodes declare they cause road traffic accidents without TL0405 listing them. The asymmetry is likely an artifact of node-by-node curation rather than an ontological feature — see [docs/methodology-causal-asymmetry.md](docs/methodology-causal-asymmetry.md) for a detailed analysis.
 
 ## References
 

@@ -90,9 +90,18 @@ export function transformToElements(data, grouping = 'type') {
     nodeDataMap.set(node.id, node);
   }
 
+  // Build causedBy lookup for reciprocation check
+  const causedBySet = new Map();
+  for (const node of data.nodes) {
+    causedBySet.set(node.id, new Set(node.causedBy || []));
+  }
+
   // Create edges (only for valid node pairs)
+  // Mark each edge as declared (target acknowledges source in causedBy) or inferred
   for (const edge of data.edges) {
     if (!validNodeIds.has(edge.source) || !validNodeIds.has(edge.target)) continue;
+    const targetCausedBy = causedBySet.get(edge.target);
+    const declared = targetCausedBy ? targetCausedBy.has(edge.source) : false;
     elements.push({
       group: 'edges',
       data: {
@@ -100,6 +109,7 @@ export function transformToElements(data, grouping = 'type') {
         source: edge.source,
         target: edge.target,
         edgeType: edge.type,
+        declared,
       },
     });
   }

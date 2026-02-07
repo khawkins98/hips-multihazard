@@ -1,0 +1,125 @@
+/* Insights bottom drawer */
+.insights-drawer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 260px;
+  background: rgba(26, 29, 39, 0.95);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(8px);
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.insights-drawer.open {
+  transform: translateY(0);
+}
+
+/* Header row */
+.insights-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px 4px;
+  flex-shrink: 0;
+}
+
+.insights-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.3px;
+}
+
+.insights-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 6px;
+}
+.insights-close:hover {
+  color: var(--text);
+  background: none;
+}
+
+/* Card grid */
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  padding: 4px 14px 12px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Category headers span full grid width */
+.insights-category {
+  grid-column: 1 / -1;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-dim);
+  padding: 4px 0 0;
+}
+
+/* Individual card */
+.insight-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  min-width: 0;
+}
+
+.insight-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(91, 156, 245, 0.15);
+}
+
+.insight-card.active {
+  border-color: var(--accent);
+  background: rgba(91, 156, 245, 0.08);
+  box-shadow: 0 0 12px rgba(91, 156, 245, 0.2);
+}
+
+/* Card content */
+.insight-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.insight-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.insight-subtitle {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 1px;
+  line-height: 1.3;
+}
+
+/* Footer toggle button active state */
+#btn-insights.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}

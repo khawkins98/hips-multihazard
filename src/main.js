@@ -10,6 +10,8 @@ import { initDetailPanel } from './ui/detail-panel.js';
 import { initSearch } from './ui/search.js';
 import { initToolbar } from './ui/toolbar.js';
 import { initLegend } from './ui/legend.js';
+import { computeInsights } from './data/insights.js';
+import { initInsights } from './ui/insights.js';
 
 /**
  * Create a simple publish/subscribe event bus for cross-module communication.
@@ -45,15 +47,21 @@ async function main() {
 
     // 3. Initialize UI components (before graph, so listeners are ready)
     initSidebar(data, bus);
-    initDetailPanel(nodeDataMap, bus);
+    initDetailPanel(nodeDataMap, data.edges, bus);
     initSearch(data.nodes, bus);
     initToolbar(getCy);
     initLegend(data.nodes, bus);
 
-    // 4. Initialize graph
+    // 4. Compute network insights
+    const insights = computeInsights(data);
+
+    // 5. Initialize graph
     const cy = initGraph(elements, bus);
 
-    // 5. Handle grouping changes (requires full re-transform)
+    // 6. Initialize insights drawer
+    initInsights(insights, data, bus);
+
+    // 7. Handle grouping changes (requires full re-transform)
     bus.on('grouping:request', ({ mode }) => {
       currentGrouping = mode;
       const result = transformToElements(data, mode);
@@ -63,19 +71,19 @@ async function main() {
       });
     });
 
-    // 6. Handle node focus (from detail panel causal links or search)
+    // 8. Handle node focus (from detail panel causal links or search)
     bus.on('node:focus', ({ id }) => {
       focusNode(cy, id, bus);
     });
 
-    // 7. Update footer with snapshot info
+    // 9. Update footer with snapshot info
     const info = document.getElementById('snapshot-info');
     if (data.meta) {
       const date = data.meta.fetchedAt ? new Date(data.meta.fetchedAt).toLocaleDateString() : 'unknown';
       info.textContent = `${data.meta.nodeCount || data.nodes.length} hazards · Snapshot: ${date}`;
     }
 
-    // 8. Hide loading overlay
+    // 10. Hide loading overlay
     loading.classList.add('fade-out');
     setTimeout(() => loading.remove(), 400);
 

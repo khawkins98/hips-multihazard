@@ -37,12 +37,23 @@ export function setupInteractions(cy, bus) {
     document.getElementById('cy').style.cursor = 'pointer';
 
     const d = node.data();
-    const conns = d.connectionCount || 0;
+    const edges = node.connectedEdges();
+    let declared = 0;
+    let inferred = 0;
+    edges.forEach(e => {
+      if (e.data('declared')) declared++;
+      else inferred++;
+    });
+    const total = declared + inferred;
+    let connLine = `${total} causal link${total !== 1 ? 's' : ''}`;
+    if (inferred > 0) {
+      connLine = `${declared} declared + ${inferred} inferred`;
+    }
     tooltip.show(
       `<strong>${esc(d.label)}</strong><br>` +
       `<span class="tt-type">${esc(d.typeName)}</span>` +
       (d.clusterName ? ` · ${esc(d.clusterName)}` : '') +
-      `<br><span class="tt-conns">${conns} causal link${conns !== 1 ? 's' : ''}</span>`,
+      `<br><span class="tt-conns">${connLine}</span>`,
       evt.renderedPosition || evt.position
     );
   });

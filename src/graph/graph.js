@@ -87,6 +87,55 @@ export function initGraph(elements, bus) {
     });
   });
 
+  // Listen for insight highlight requests
+  bus.on('insight:highlight', ({ nodeIds, edgeFilter, clear }) => {
+    if (clear) {
+      cy.elements().removeClass('dimmed highlighted highlight-hidden');
+      return;
+    }
+    const idSet = new Set(nodeIds || []);
+    cy.batch(() => {
+      cy.nodes().addClass('dimmed');
+      cy.edges().addClass('highlight-hidden');
+      for (const id of idSet) {
+        const node = cy.getElementById(id);
+        if (node && !node.empty()) {
+          node.removeClass('dimmed').addClass('highlighted');
+          node.ancestors().removeClass('dimmed');
+        }
+      }
+      if (edgeFilter === 'cross-type') {
+        // Show only cross-type edges (source and target have different typeName)
+        cy.edges().forEach((edge) => {
+          const src = cy.getElementById(edge.data('source'));
+          const tgt = cy.getElementById(edge.data('target'));
+          if (src.data('typeName') !== tgt.data('typeName')) {
+            edge.removeClass('highlight-hidden').addClass('highlighted');
+          }
+        });
+      } else if (edgeFilter === 'inferred') {
+        // Show only inferred (unreciprocated) edges
+        cy.edges().forEach((edge) => {
+          if (!edge.data('declared')) {
+            edge.removeClass('highlight-hidden').addClass('highlighted');
+          }
+        });
+        // Un-dim nodes connected to inferred edges
+        cy.edges('.highlighted').connectedNodes().forEach((node) => {
+          node.removeClass('dimmed').addClass('highlighted');
+          node.ancestors().removeClass('dimmed');
+        });
+      } else if (idSet.size > 0) {
+        // Show edges between highlighted nodes
+        cy.edges().forEach((edge) => {
+          if (idSet.has(edge.data('source')) && idSet.has(edge.data('target'))) {
+            edge.removeClass('highlight-hidden').addClass('highlighted');
+          }
+        });
+      }
+    });
+  });
+
   // Listen for layout change requests
   bus.on('layout:change', ({ name }) => {
     // Clear hyper-route classes when switching away from hyperspace
@@ -104,12 +153,24 @@ export function initGraph(elements, bus) {
   });
 
   // Listen for edge visibility toggle
-  bus.on('edges:toggle', ({ visible }) => {
-    if (visible) {
-      cy.edges().removeClass('hidden');
-    } else {
-      cy.edges().addClass('hidden');
-    }
+  bus.on('edges:toggle', ({ visible, declaredOnly }) => {
+    cy.batch(() => {
+      if (!visible) {
+        cy.edges().addClass('hidden');
+      } else if (declaredOnly) {
+        cy.edges().forEach((edge) => {
+          if (edge.data('declared')) {
+            edge.removeClass('hidden');
+          } else {
+            edge.addClass('hidden');
+          }
+        });
+      } else {
+        cy.edges().removeClass('hidden');
+      }
+    });
+    // Re-run layout so force simulation reflects the new edge set
+    runLayout(currentLayout, bus);
   });
 
   // Listen for type filter changes
@@ -155,8 +216,13 @@ export function initGraph(elements, bus) {
     cy.add(newElements);
     // Sync edge visibility with the toggle state
     const edgeToggle = document.getElementById('edge-toggle');
+    const declaredToggle = document.getElementById('edge-declared-toggle');
     if (edgeToggle && !edgeToggle.checked) {
       cy.edges().addClass('hidden');
+    } else if (declaredToggle && declaredToggle.checked) {
+      cy.edges().forEach((edge) => {
+        if (!edge.data('declared')) edge.addClass('hidden');
+      });
     }
     currentLayout = 'hyperspace';
     cy.nodes('[?isCompound]').addClass('compound-invisible');
@@ -189,7 +255,8 @@ export function runLayout(name, bus) {
     });
   }
 
-  const layout = cy.layout(opts);
+  // Run on visible elements so hidden edges don't influence force computation
+  const layout = cy.elements(':visible').layout(opts);
   layout.run();
 }
 

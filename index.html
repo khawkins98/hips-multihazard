@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/src/styles/sidebar.css" />
   <link rel="stylesheet" href="/src/styles/detail-panel.css" />
   <link rel="stylesheet" href="/src/styles/toolbar.css" />
+  <link rel="stylesheet" href="/src/styles/insights.css" />
 </head>
 <body>
   <header id="app-header">
@@ -44,6 +45,9 @@
         <h2>Causal Links</h2>
         <label id="edge-toggle-label">
           <input type="checkbox" id="edge-toggle" checked /> Show all causal links
+        </label>
+        <label id="edge-declared-label">
+          <input type="checkbox" id="edge-declared-toggle" /> Declared only
         </label>
       </section>
 
@@ -87,6 +91,9 @@
 
   <footer id="app-footer">
     <span>Data from <a href="https://www.preventionweb.net/drr-glossary/hips" target="_blank" rel="noopener">UNDRR/ISC Hazard Information Profiles</a> &middot; CC BY 4.0</span>
+    <span id="footer-actions">
+      <button id="btn-insights">Insights</button>
+    </span>
     <span id="snapshot-info"></span>
   </footer>
 

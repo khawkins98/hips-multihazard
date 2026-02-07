@@ -84,11 +84,31 @@ function initGroupingControls(bus) {
   }
 }
 
-/** Bind the causal-link toggle checkbox to emit 'edges:toggle' events. */
+/** Bind the causal-link toggle checkboxes to emit 'edges:toggle' events. */
 function initEdgeToggle(bus) {
   const toggle = document.getElementById('edge-toggle');
+  const declaredToggle = document.getElementById('edge-declared-toggle');
+  const declaredLabel = document.getElementById('edge-declared-label');
+
+  function syncDeclaredState() {
+    declaredToggle.disabled = !toggle.checked;
+    declaredLabel.classList.toggle('disabled', !toggle.checked);
+  }
+
+  function emitEdgeState() {
+    bus.emit('edges:toggle', {
+      visible: toggle.checked,
+      declaredOnly: declaredToggle.checked,
+    });
+  }
+
   toggle.addEventListener('change', () => {
-    bus.emit('edges:toggle', { visible: toggle.checked });
+    syncDeclaredState();
+    emitEdgeState();
+  });
+
+  declaredToggle.addEventListener('change', () => {
+    emitEdgeState();
   });
 }
 

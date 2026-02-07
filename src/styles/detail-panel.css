@@ -156,6 +156,16 @@ a.badge-id:hover {
   color: #42A5F5;
 }
 
+.causal-link.inferred {
+  opacity: 0.7;
+}
+
+.causal-inferred {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
 /* Source links */
 .source-links {
   display: flex;

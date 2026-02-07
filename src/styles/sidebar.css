@@ -81,6 +81,25 @@
   background: var(--bg-elevated);
 }
 
+#edge-declared-label {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 3px 6px 3px 22px;
+  border-radius: var(--radius-sm);
+}
+
+#edge-declared-label:hover {
+  background: var(--bg-elevated);
+}
+
+#edge-declared-label.disabled {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}
+
 /* Layout controls */
 #layout-controls {
   display: flex;

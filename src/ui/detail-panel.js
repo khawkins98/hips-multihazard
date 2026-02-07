@@ -5,6 +5,8 @@ import { getTypeDef } from '../data/hazard-types.js';
 
 let nodeDataMap = null;
 let bus = null;
+/** @type {Map<string, Set<string>>} targetId -> Set of sourceIds that declare "I cause targetId" */
+let incomingByTarget = null;
 
 /** Maps scope note type keys (from the API's dct:type) to human-readable labels. */
 const SCOPE_NOTE_LABELS = {
@@ -19,11 +21,19 @@ const SCOPE_NOTE_LABELS = {
 /**
  * Initialize the detail panel.
  * @param {Map} dataMap - nodeDataMap from transform
+ * @param {Array} edges - Array of { source, target } edge objects
  * @param {object} eventBus - Event bus
  */
-export function initDetailPanel(dataMap, eventBus) {
+export function initDetailPanel(dataMap, edges, eventBus) {
   nodeDataMap = dataMap;
   bus = eventBus;
+
+  // Build reverse edge lookup: for each target, which sources declare "I cause target"
+  incomingByTarget = new Map();
+  for (const e of edges) {
+    if (!incomingByTarget.has(e.target)) incomingByTarget.set(e.target, new Set());
+    incomingByTarget.get(e.target).add(e.source);
+  }
 
   bus.on('node:selected', ({ id }) => showDetail(id));
   bus.on('node:deselected', hideDetail);
@@ -101,20 +111,44 @@ function showDetail(nodeId) {
     `;
   }
 
-  // Caused by list
-  if (data.causedBy?.length) {
-    html += `
-      <div class="detail-section">
-        <h3>Caused By (${data.causedBy.length})</h3>
-        <ul class="causal-list">
-          ${data.causedBy.map(id => {
-            const source = nodeDataMap.get(id);
-            const label = source?.label || id;
-            return `<li><span class="causal-link caused-by" data-node-id="${esc(id)}">${esc(label)}</span></li>`;
-          }).join('')}
-        </ul>
-      </div>
-    `;
+  // Caused by list — merge declared + inferred from reverse edge lookup
+  {
+    const declaredSet = new Set(data.causedBy || []);
+    const incomingSources = incomingByTarget?.get(data.id) || new Set();
+    const inferredIds = [...incomingSources].filter(id => !declaredSet.has(id));
+    const declaredCount = declaredSet.size;
+    const inferredCount = inferredIds.length;
+    const totalCausedBy = declaredCount + inferredCount;
+
+    if (totalCausedBy > 0) {
+      const headerParts = [];
+      if (declaredCount) headerParts.push(`${declaredCount} declared`);
+      if (inferredCount) headerParts.push(`${inferredCount} inferred`);
+
+      html += `
+        <div class="detail-section">
+          <h3>Caused By (${headerParts.join(' + ')})</h3>
+          <ul class="causal-list">
+            ${(data.causedBy || []).map(id => {
+              const source = nodeDataMap.get(id);
+              const label = source?.label || id;
+              return `<li><span class="causal-link caused-by" data-node-id="${esc(id)}">${esc(label)}</span></li>`;
+            }).join('')}
+            ${inferredIds
+              .sort((a, b) => {
+                const la = nodeDataMap.get(a)?.label || a;
+                const lb = nodeDataMap.get(b)?.label || b;
+                return la.localeCompare(lb);
+              })
+              .map(id => {
+                const source = nodeDataMap.get(id);
+                const label = source?.label || id;
+                return `<li><span class="causal-link caused-by inferred" data-node-id="${esc(id)}">${esc(label)}</span> <span class="causal-inferred">(inferred)</span></li>`;
+              }).join('')}
+          </ul>
+        </div>
+      `;
+    }
   }
 
   // Sources & References

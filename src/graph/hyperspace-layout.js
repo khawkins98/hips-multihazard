@@ -132,10 +132,10 @@ export function getHyperspaceLayout(source) {
     ? source.filter(el => el.group === 'nodes' && !el.data.isCompound)
     : source.nodes('[!isCompound]').map(n => ({ data: n.data() }));
 
-  // Collect edges for hyper-route detection
+  // Collect edges for hyper-route detection (only visible edges when from cy instance)
   const edges = Array.isArray(source)
     ? source.filter(el => el.group === 'edges')
-    : source.edges().map(e => ({ data: e.data() }));
+    : source.edges(':visible').map(e => ({ data: e.data() }));
 
   // Build node lookup
   const nodeById = new Map();

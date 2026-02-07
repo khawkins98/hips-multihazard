@@ -6,7 +6,7 @@
   --border: #2e3244;
   --text: #e1e4ed;
   --text-muted: #8b90a0;
-  --text-dim: #5a5f73;
+  --text-dim: #6e7389;
   --accent: #5b9cf5;
   --accent-hover: #7ab4ff;
   --danger: #ef5350;
@@ -16,6 +16,7 @@
   --detail-width: 340px;
   --radius: 6px;
   --radius-sm: 4px;
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
 
   /* Semantic graph colors (mirrored in src/graph/constants.js STYLE_COLORS) */
   --edge-color: #999;
@@ -44,6 +45,11 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+*:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 body {
@@ -397,4 +403,12 @@ input[type="checkbox"],
 input[type="radio"] {
   accent-color: var(--accent);
   margin-right: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

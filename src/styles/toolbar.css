@@ -57,8 +57,9 @@
   color: var(--text-dim);
 }
 
-#search-input:focus {
+#search-input:focus-visible {
   border-color: var(--accent);
+  box-shadow: var(--focus-ring);
 }
 
 /* Search results dropdown */

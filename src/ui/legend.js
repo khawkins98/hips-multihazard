@@ -1,5 +1,5 @@
 /**
- * Legend: color swatches for hazard types + edge type indicators.
+ * Legend: color swatches for hazard types + edge type indicators + hyper-route corridors.
  */
 import { HAZARD_TYPES } from '../data/hazard-types.js';
 
@@ -14,8 +14,12 @@ export function initLegend(nodes, bus) {
   // Determine which types actually have nodes
   const presentTypes = new Set(nodes.map(n => n.typeName).filter(Boolean));
 
+  // Track current hyper-route highlight so we can toggle off
+  let activeRouteIdx = -1;
+
   function renderDefaultLegend() {
     container.innerHTML = '';
+    activeRouteIdx = -1;
 
     for (const [name, def] of Object.entries(HAZARD_TYPES)) {
       if (!presentTypes.has(name)) continue;
@@ -47,44 +51,86 @@ export function initLegend(nodes, bus) {
     container.appendChild(edgeItem);
   }
 
-  function renderCorridorLegend() {
-    container.innerHTML = '';
+  function renderRoutes(routes) {
+    // Remove any existing route section
+    const existing = container.querySelector('.legend-routes');
+    if (existing) existing.remove();
 
-    // Node size legend
-    const sizeItem = document.createElement('div');
-    sizeItem.className = 'legend-item';
-    const smallCircle = document.createElement('span');
-    smallCircle.className = 'legend-node';
-    smallCircle.style.background = '#666';
-    smallCircle.style.width = '8px';
-    smallCircle.style.height = '8px';
-    const sizeLabel = document.createElement('span');
-    sizeLabel.textContent = 'Node size = hazard count';
-    sizeItem.append(smallCircle, sizeLabel);
-    container.appendChild(sizeItem);
+    if (!routes || routes.length === 0) return;
 
-    // Edge width legend
-    const widthItem = document.createElement('div');
-    widthItem.className = 'legend-item';
-    const thickLine = document.createElement('span');
-    thickLine.className = 'legend-edge';
-    thickLine.style.height = '4px';
-    thickLine.style.background = '#5b9cf5';
-    const widthLabel = document.createElement('span');
-    widthLabel.textContent = 'Edge width = causal link count';
-    widthItem.append(thickLine, widthLabel);
-    container.appendChild(widthItem);
+    const section = document.createElement('div');
+    section.className = 'legend-routes';
+
+    const divider = document.createElement('div');
+    divider.className = 'legend-divider';
+    divider.textContent = 'Hyper-Routes';
+    section.appendChild(divider);
+
+    const subtitle = document.createElement('div');
+    subtitle.className = 'legend-route-subtitle';
+    subtitle.textContent = 'Dense causal corridors between hazard types';
+    section.appendChild(subtitle);
+
+    routes.forEach((route, idx) => {
+      const item = document.createElement('div');
+      item.className = 'legend-item legend-route-item';
+      item.style.cursor = 'pointer';
+
+      const routeLine = document.createElement('span');
+      routeLine.className = 'legend-route-line';
+
+      const label = document.createElement('span');
+      label.textContent = route.label;
+
+      const badge = document.createElement('span');
+      badge.className = 'legend-route-badge';
+      badge.textContent = route.edgeCount;
+
+      item.append(routeLine, label, badge);
+      section.appendChild(item);
+
+      item.addEventListener('click', () => {
+        bus.emit('hyperroute:highlight', {
+          routeIdx: activeRouteIdx === idx ? -1 : idx,
+          route: activeRouteIdx === idx ? null : route,
+        });
+        activeRouteIdx = activeRouteIdx === idx ? -1 : idx;
+
+        // Update active state on route items
+        section.querySelectorAll('.legend-route-item').forEach((el, i) => {
+          el.classList.toggle('active', i === activeRouteIdx);
+        });
+      });
+    });
+
+    container.appendChild(section);
   }
 
   // Initial render
   renderDefaultLegend();
 
-  // Listen for mode changes
-  bus.on('grouping:change', ({ mode }) => {
-    if (mode === 'corridor') {
-      renderCorridorLegend();
-    } else {
-      renderDefaultLegend();
+  // Listen for mode changes — always re-render default legend
+  bus.on('grouping:change', () => {
+    renderDefaultLegend();
+  });
+
+  // Listen for hyper-route data
+  bus.on('hyperspace:routes', ({ routes }) => {
+    renderRoutes(routes);
+  });
+
+  // Clear routes on layout change away from hyperspace
+  bus.on('layout:change', ({ name }) => {
+    if (name !== 'hyperspace') {
+      const existing = container.querySelector('.legend-routes');
+      if (existing) existing.remove();
+      activeRouteIdx = -1;
     }
+  });
+
+  // Handle route highlight requests
+  bus.on('hyperroute:highlight', ({ route }) => {
+    // This event is handled by graph.js interactions or we can do it here via getCy
+    // For now, emit a more specific event that graph.js will handle
   });
 }

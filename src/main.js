@@ -60,7 +60,6 @@ async function main() {
       bus.emit('grouping:change', {
         mode,
         elements: result.elements,
-        corridorStats: result.corridorStats || null,
       });
     });
 

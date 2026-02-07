@@ -5,7 +5,6 @@ import { getTypeDef } from '../data/hazard-types.js';
 
 let nodeDataMap = null;
 let bus = null;
-let corridorStats = null;
 
 /** Maps scope note type keys (from the API's dct:type) to human-readable labels. */
 const SCOPE_NOTE_LABELS = {
@@ -29,12 +28,9 @@ export function initDetailPanel(dataMap, eventBus) {
   bus.on('node:selected', ({ id }) => showDetail(id));
   bus.on('node:deselected', hideDetail);
 
-  bus.on('grouping:change', ({ mode, corridorStats: stats }) => {
-    corridorStats = stats || null;
+  bus.on('grouping:change', () => {
     hideDetail();
   });
-
-  bus.on('corridor:selected', showCorridorDetail);
 }
 
 /**
@@ -53,14 +49,16 @@ function showDetail(nodeId) {
   content.classList.remove('hidden');
 
   const typeDef = getTypeDef(data.typeName);
+  const typeSlug = (data.typeName || '').toLowerCase().replace(/\s+/g, '-');
+  const hipsBase = 'https://www.preventionweb.net/drr-glossary/hips';
 
   let html = `
     <div class="detail-header">
       <div class="detail-title">${esc(data.label)}</div>
       <div class="detail-badges">
-        <span class="badge badge-type" style="background:${typeDef.color}">${esc(data.typeName || 'Unknown')}</span>
-        ${data.clusterName ? `<span class="badge badge-cluster">${esc(data.clusterName)}</span>` : ''}
-        ${data.identifier ? `<span class="badge badge-id">${esc(data.identifier)}</span>` : ''}
+        <a class="badge badge-type" style="background:${typeDef.color}" href="${hipsBase}#${esc(typeSlug)}" target="_blank" rel="noopener">${esc(data.typeName || 'Unknown')}</a>
+        ${data.clusterName ? `<a class="badge badge-cluster" href="${hipsBase}#${esc(typeSlug)}" target="_blank" rel="noopener">${esc(data.clusterName)}</a>` : ''}
+        ${data.id?.startsWith('http') ? `<a class="badge badge-id" href="${esc(data.id)}" target="_blank" rel="noopener">${esc(data.identifier || data.id)}</a>` : (data.identifier ? `<span class="badge badge-id">${esc(data.identifier)}</span>` : '')}
       </div>
     </div>
   `;
@@ -163,87 +161,6 @@ function showDetail(nodeId) {
       bus.emit('node:focus', { id: targetId });
     });
   });
-}
-
-/**
- * Render the detail panel for a corridor selection (type node or edge).
- */
-function showCorridorDetail(evt) {
-  const placeholder = document.getElementById('detail-placeholder');
-  const content = document.getElementById('detail-content');
-  placeholder.classList.add('hidden');
-  content.classList.remove('hidden');
-
-  let html = '';
-
-  if (evt.type === 'node') {
-    const typeDef = getTypeDef(evt.typeName);
-    html += `
-      <div class="detail-header">
-        <div class="detail-title">${esc(typeDef.short)}</div>
-        <div class="detail-badges">
-          <span class="badge badge-type" style="background:${typeDef.color}">${esc(evt.typeName)}</span>
-          <span class="badge badge-cluster">${evt.hazardCount} hazards</span>
-        </div>
-      </div>
-    `;
-
-    const stats = corridorStats?.get(evt.typeName);
-    if (stats) {
-      if (stats.intra > 0) {
-        html += `
-          <div class="detail-section">
-            <h3>Intra-Type Links</h3>
-            <p>${stats.intra} causal links within ${esc(typeDef.short)}</p>
-          </div>
-        `;
-      }
-      if (stats.outbound.length) {
-        html += `
-          <div class="detail-section">
-            <h3>Outbound Corridors</h3>
-            <ul class="causal-list">
-              ${stats.outbound.map(o => {
-                const tDef = getTypeDef(o.type);
-                return `<li><span class="causal-link causes">${o.count} links &rarr; ${esc(tDef.short)}</span></li>`;
-              }).join('')}
-            </ul>
-          </div>
-        `;
-      }
-      if (stats.inbound.length) {
-        html += `
-          <div class="detail-section">
-            <h3>Inbound Corridors</h3>
-            <ul class="causal-list">
-              ${stats.inbound.map(i => {
-                const sDef = getTypeDef(i.type);
-                return `<li><span class="causal-link caused-by">${i.count} links &larr; ${esc(sDef.short)}</span></li>`;
-              }).join('')}
-            </ul>
-          </div>
-        `;
-      }
-    }
-  } else if (evt.type === 'edge') {
-    const srcDef = getTypeDef(evt.sourceType);
-    const tgtDef = getTypeDef(evt.targetType);
-    html += `
-      <div class="detail-header">
-        <div class="detail-title">${esc(evt.sourceName)} &rarr; ${esc(evt.targetName)}</div>
-        <div class="detail-badges">
-          <span class="badge badge-type" style="background:${srcDef.color}">${esc(evt.sourceName)}</span>
-          <span class="badge badge-type" style="background:${tgtDef.color}">${esc(evt.targetName)}</span>
-        </div>
-      </div>
-      <div class="detail-section">
-        <h3>Causal Corridor</h3>
-        <p>${evt.weight} causal link${evt.weight !== 1 ? 's' : ''} from ${esc(evt.sourceName)} hazards to ${esc(evt.targetName)} hazards</p>
-      </div>
-    `;
-  }
-
-  content.innerHTML = html;
 }
 
 /** Hide the detail content and restore the placeholder prompt. */

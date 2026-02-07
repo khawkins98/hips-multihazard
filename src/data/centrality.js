@@ -1,4 +1,5 @@
 /**
+ * @module data/centrality
  * Compute centrality metrics (betweenness, PageRank, closeness) for all nodes.
  * Uses Cytoscape.js built-in graph algorithms.
  */

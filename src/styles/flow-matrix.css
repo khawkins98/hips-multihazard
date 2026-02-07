@@ -8,7 +8,7 @@
 /* Floating panel */
 .flow-panel {
   position: fixed;
-  z-index: 900;
+  z-index: var(--z-floating-panels);
   min-width: 480px;
   max-width: 90vw;
   max-height: 85vh;
@@ -108,8 +108,8 @@
 }
 
 .flow-copy-btn.copied {
-  border-color: #4CAF50;
-  color: #4CAF50;
+  border-color: var(--success-color);
+  color: var(--success-color);
 }
 
 /* Table */
@@ -188,7 +188,7 @@
 }
 
 .flow-cell.active {
-  outline: 2px solid #FFD600;
+  outline: 2px solid var(--flow-active-outline);
   outline-offset: -2px;
   box-shadow: 0 0 8px rgba(255, 214, 0, 0.3);
   z-index: 2;

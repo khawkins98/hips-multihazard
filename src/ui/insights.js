@@ -1,7 +1,13 @@
 /**
- * Insights drawer: bottom panel with 9 network-statistics cards.
- * Slides up from the bottom of #graph-container.
+ * @module ui/insights
+ * Insights floating panel with 9 network-statistics cards.
+ * Each card shows a computed metric and highlights relevant nodes on click.
+ * @emits insight:highlight
+ * @emits node:focus
+ * @listens node:selected
  */
+import { esc, setupDrag } from '../utils/dom.js';
+import { INSIGHT_STAGGER_MS, INSIGHT_ANIMATION_MS } from './constants.js';
 
 let bus = null;
 let drawerEl = null;
@@ -189,6 +195,11 @@ export function initInsights(insights, data, eventBus) {
   setupDrag(drawerEl, drawerEl.querySelector('.insights-titlebar'));
 }
 
+/**
+ * Build the full panel HTML including title bar, grid, and all cards.
+ * @param {Object} insights - Computed insight metrics
+ * @returns {string} Panel inner HTML
+ */
 function buildPanelHTML(insights) {
   let html = `
     <div class="insights-titlebar">
@@ -219,6 +230,7 @@ function buildPanelHTML(insights) {
   return html;
 }
 
+/** Toggle the insights panel open or closed. */
 function togglePanel(insights) {
   if (!drawerEl.classList.contains('hidden')) {
     closePanel();
@@ -227,6 +239,7 @@ function togglePanel(insights) {
   }
 }
 
+/** Open the insights panel and trigger count-up animation on first open. */
 function openPanel(insights) {
   drawerEl.classList.remove('hidden');
   document.getElementById('btn-insights')?.classList.add('active');
@@ -236,6 +249,7 @@ function openPanel(insights) {
   }
 }
 
+/** Close the insights panel and clear any active highlights. */
 function closePanel() {
   drawerEl.classList.add('hidden');
   document.getElementById('btn-insights')?.classList.remove('active');
@@ -256,8 +270,8 @@ function clearActive() {
  */
 function animateCountUp() {
   const cards = drawerEl.querySelectorAll('.insight-card');
-  const DURATION = 800;
-  const STAGGER = 80;
+  const DURATION = INSIGHT_ANIMATION_MS;
+  const STAGGER = INSIGHT_STAGGER_MS;
 
   cards.forEach((card, i) => {
     const valueEl = card.querySelector('.insight-value');
@@ -287,50 +301,16 @@ function animateCountUp() {
   });
 }
 
-function formatValue(current, format, target) {
+/**
+ * Format a numeric value for card display.
+ * @param {number} current - Current animated value
+ * @param {string} format - Format type: 'percent', 'decimal', or 'int'
+ * @param {number} target - Target final value (unused, available for future formatting)
+ * @returns {string} Formatted string
+ */
+export function formatValue(current, format, target) {
   if (format === 'percent') return Math.round(current) + '%';
   if (format === 'decimal') return current.toFixed(1);
   // int
   return Math.round(current).toLocaleString();
-}
-
-/**
- * Make a panel draggable by its title bar.
- */
-function setupDrag(panel, handle) {
-  let dragging = false;
-  let offsetX = 0;
-  let offsetY = 0;
-
-  handle.addEventListener('mousedown', (e) => {
-    if (e.target.closest('button')) return;
-    dragging = true;
-    const rect = panel.getBoundingClientRect();
-    offsetX = e.clientX - rect.left;
-    offsetY = e.clientY - rect.top;
-    if (!panel.classList.contains('dragged')) {
-      panel.style.left = rect.left + 'px';
-      panel.style.top = rect.top + 'px';
-      panel.style.bottom = 'auto';
-      panel.classList.add('dragged');
-    }
-    e.preventDefault();
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (!dragging) return;
-    panel.style.left = (e.clientX - offsetX) + 'px';
-    panel.style.top = (e.clientY - offsetY) + 'px';
-  });
-
-  document.addEventListener('mouseup', () => {
-    dragging = false;
-  });
-}
-
-function esc(str) {
-  if (!str) return '';
-  const d = document.createElement('div');
-  d.textContent = String(str);
-  return d.innerHTML;
 }

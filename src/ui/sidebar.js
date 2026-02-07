@@ -1,7 +1,16 @@
 /**
- * Sidebar: type filter checkboxes, grouping controls, edge toggle, layout buttons.
+ * @module ui/sidebar
+ * Sidebar: type filter checkboxes, grouping controls, edge toggle, layout buttons, centrality ranking.
+ * @emits filter:types
+ * @emits grouping:request
+ * @emits edges:toggle
+ * @emits layout:change
+ * @emits node:focus
+ * @listens centrality:computed
  */
 import { HAZARD_TYPES, getTypeDef } from '../data/hazard-types.js';
+import { esc } from '../utils/dom.js';
+import { TOP_N_CENTRALITY } from './constants.js';
 
 /**
  * Initialize sidebar controls.
@@ -145,6 +154,7 @@ export function initCentralityRanking(bus) {
 
   select.addEventListener('change', renderList);
 
+  /** Render the centrality ranking list based on the selected metric. */
   function renderList() {
     if (!currentMetrics) return;
     const metricKey = select.value;
@@ -153,7 +163,7 @@ export function initCentralityRanking(bus) {
     // Sort by rank, take top 20
     const sorted = [...currentMetrics.entries()]
       .sort((a, b) => a[1][rankKey] - b[1][rankKey])
-      .slice(0, 20);
+      .slice(0, TOP_N_CENTRALITY);
 
     const ul = listContainer.querySelector('ul');
     ul.innerHTML = sorted.map(([id, m]) => {
@@ -177,13 +187,6 @@ export function initCentralityRanking(bus) {
         bus.emit('node:focus', { id: li.dataset.nodeId });
       });
     });
-  }
-
-  function esc(str) {
-    if (!str) return '';
-    const d = document.createElement('div');
-    d.textContent = String(str);
-    return d.innerHTML;
   }
 }
 

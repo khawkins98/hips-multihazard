@@ -1,7 +1,11 @@
 /**
+ * @module ui/search
  * Search with typeahead over hazard names, alt labels, and identifiers.
+ * @emits node:focus
  */
 import { getTypeDef } from '../data/hazard-types.js';
+import { esc } from '../utils/dom.js';
+import { SEARCH_SCORES, MAX_SEARCH_RESULTS } from './constants.js';
 
 let allNodes = [];
 let bus = null;
@@ -26,7 +30,7 @@ export function initSearch(nodes, eventBus) {
       return;
     }
 
-    const matches = search(query).slice(0, 20);
+    const matches = searchNodes(allNodes, query).slice(0, MAX_SEARCH_RESULTS);
     activeIndex = -1;
 
     if (matches.length === 0) {
@@ -91,24 +95,25 @@ export function initSearch(nodes, eventBus) {
 }
 
 /**
- * Score and rank all hazard nodes against a search query.
+ * Score and rank hazard nodes against a search query.
  * Scoring: exact label=100, starts-with=80, label contains=60, identifier=40, alt label=30.
+ * @param {Array} nodes - Array of node data objects
  * @param {string} query - Lowercased search term
  * @returns {Array} Matched nodes sorted by descending score
  */
-function search(query) {
-  return allNodes
+export function searchNodes(nodes, query) {
+  return nodes
     .map(node => {
       let score = 0;
       const label = node.label?.toLowerCase() || '';
       const id = node.identifier?.toLowerCase() || '';
       const alts = (node.altLabels || []).map(a => a.toLowerCase());
 
-      if (label === query) score = 100;
-      else if (label.startsWith(query)) score = 80;
-      else if (label.includes(query)) score = 60;
-      else if (id.includes(query)) score = 40;
-      else if (alts.some(a => a.includes(query))) score = 30;
+      if (label === query) score = SEARCH_SCORES.exactLabel;
+      else if (label.startsWith(query)) score = SEARCH_SCORES.startsWithLabel;
+      else if (label.includes(query)) score = SEARCH_SCORES.containsLabel;
+      else if (id.includes(query)) score = SEARCH_SCORES.containsIdentifier;
+      else if (alts.some(a => a.includes(query))) score = SEARCH_SCORES.containsAltLabel;
 
       return { ...node, score };
     })
@@ -135,12 +140,14 @@ function highlight(text, query) {
   if (!text) return '';
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const re = new RegExp(`(${escaped})`, 'gi');
-  return escHtml(text).replace(re, '<strong>$1</strong>');
+  return esc(text).replace(re, '<strong>$1</strong>');
 }
 
-/** HTML-escape a string to prevent XSS when building search result markup. */
-function escHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+/**
+ * Reset module state. Test-only API.
+ * @private
+ */
+export function _reset() {
+  allNodes = [];
+  bus = null;
 }

@@ -1,4 +1,5 @@
 /**
+ * @module graph/hyperspace-layout
  * Orbital galaxy layout with hyper-route detection.
  *
  * Positions nodes in concentric orbital rings:
@@ -9,12 +10,13 @@
  * Within each orbit, nodes are grouped by hazard type into angular sectors.
  * Cross-type corridors ("hyper-routes") are detected and stored for
  * visualization by other modules.
+ *
+ * @listens layout:change
+ * @listens grouping:change
  */
 import { HAZARD_TYPES } from '../data/hazard-types.js';
-
-// Orbital radii — exponentially increasing so inner orbits (fewer important nodes) get space
-const ORBIT_RADII  = [0, 150, 320, 520, 750, 1000, 1350];
-const ORBIT_JITTER = [0,  25,  30,  35,  40,   45,   60];
+import { debounce } from '../utils/debounce.js';
+import { ORBIT_RADII, ORBIT_JITTER, HYPER_ROUTE_EDGE_THRESHOLD, HYPER_ROUTE_BRIDGE_MIN, MAX_HYPER_ROUTES, HYPER_ROUTE_LABEL_FALLBACK_RADIUS, LABEL_PAN_ZOOM_DEBOUNCE_MS } from './constants.js';
 
 // Type ordering chosen to minimize cross-type edge angular distance.
 // Technological (hub) is placed between Met/Hydro and Geological, its heaviest partners.
@@ -29,15 +31,13 @@ const TYPE_ORDER = [
   'Environmental',
 ];
 
-const HYPER_ROUTE_EDGE_THRESHOLD = 40;  // min cross-type edges for a candidate
-const HYPER_ROUTE_BRIDGE_MIN = 3;       // min cross-edges for a bridge node
-const MAX_HYPER_ROUTES = 5;
-
 /**
  * Simple seeded hash for deterministic jitter.
  * Returns a float in [-1, 1].
+ * @param {string} id - Node ID to hash
+ * @returns {number} Jitter value in range [-1, 1]
  */
-function seededJitter(id) {
+export function seededJitter(id) {
   let h = 0;
   for (let i = 0; i < id.length; i++) {
     h = ((h << 5) - h + id.charCodeAt(i)) | 0;
@@ -49,8 +49,10 @@ function seededJitter(id) {
 /**
  * Assign each node to an orbit (1-6) based on connectionCount.
  * Orbit 6 = zero connections. Orbits 1-5 = quantile split of the rest.
+ * @param {Array<{data: {id: string, connectionCount: number}}>} nodes - Nodes to assign
+ * @returns {Map<string, number>} Map of nodeId to orbit number (1-6)
  */
-function assignOrbits(nodes) {
+export function assignOrbits(nodes) {
   const connected = [];
   const zeroConn = [];
 
@@ -83,8 +85,10 @@ function assignOrbits(nodes) {
 /**
  * Compute angular sector arcs for each type, proportional to node count.
  * Returns Map<typeName, { startAngle, endAngle, center }>.
+ * @param {Array<{data: {typeName: string}}>} nodes - Nodes to allocate to sectors
+ * @returns {Map<string, {startAngle: number, endAngle: number, center: number}>} Sector arcs by type
  */
-function computeTypeSectors(nodes) {
+export function computeTypeSectors(nodes) {
   // Count nodes per type
   const typeCounts = new Map();
   for (const name of TYPE_ORDER) typeCounts.set(name, 0);
@@ -227,7 +231,7 @@ export function getHyperspaceLayout(source) {
  * Detect dense cross-type corridors.
  * Returns top MAX_HYPER_ROUTES corridors sorted by edge count.
  */
-function detectHyperRoutes(nodes, edges, nodeById, sectors) {
+export function detectHyperRoutes(nodes, edges, nodeById, sectors) {
   // Build cross-type edge count matrix
   const pairCounts = new Map(); // "typeA|||typeB" -> { count, edgeIds, srcNodes, tgtNodes }
   const nodeCrossEdges = new Map(); // nodeId -> Map<otherType, count>
@@ -350,7 +354,7 @@ export function initHyperRouteLabels(cy, bus) {
         modelX = sumX / count;
         modelY = sumY / count;
       } else {
-        const r = 600; // midpoint radius
+        const r = HYPER_ROUTE_LABEL_FALLBACK_RADIUS;
         modelX = r * Math.cos(route.midAngle);
         modelY = r * Math.sin(route.midAngle);
       }
@@ -385,7 +389,7 @@ export function initHyperRouteLabels(cy, bus) {
     updateLabelPositions();
 
     // Update on pan/zoom
-    panZoomHandler = debounce(() => updateLabelPositions(), 16);
+    panZoomHandler = debounce(() => updateLabelPositions(), LABEL_PAN_ZOOM_DEBOUNCE_MS);
     cy.on('pan zoom', panZoomHandler);
   }
 
@@ -414,12 +418,4 @@ export function initHyperRouteLabels(cy, bus) {
 
   // Expose create/clear for graph.js to call
   return { createLabels, clearLabels };
-}
-
-function debounce(fn, ms) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), ms);
-  };
 }

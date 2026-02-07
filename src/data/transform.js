@@ -1,4 +1,5 @@
 /**
+ * @module data/transform
  * Transforms snapshot data into Cytoscape elements (nodes + edges).
  * Supports compound node grouping by Type > Cluster > Hazard.
  */

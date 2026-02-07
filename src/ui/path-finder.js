@@ -1,6 +1,13 @@
 /**
+ * @module ui/path-finder
  * Shortest Path Finder: select two nodes to find and highlight
  * the shortest directed causal path between them.
+ * @emits pathfinder:mode
+ * @emits pathfinder:clear
+ * @emits pathfinder:result
+ * @listens pathfinder:select
+ * @listens pathfinder:clear
+ * @listens grouping:change
  */
 
 let pathfinderActive = false;
@@ -131,4 +138,14 @@ export function initPathFinder(bus, getCy) {
  */
 export function isPathfinderActive() {
   return pathfinderActive;
+}
+
+/**
+ * Reset module state. Test-only API.
+ * @private
+ */
+export function _reset() {
+  pathfinderActive = false;
+  source = null;
+  target = null;
 }

@@ -1,5 +1,11 @@
 /**
- * Legend: color swatches for hazard types + edge type indicators + hyper-route corridors.
+ * @module ui/legend
+ * Legend: color swatches for hazard types, edge type indicators, hyper-route corridors.
+ * @listens grouping:change
+ * @listens hyperspace:routes
+ * @listens layout:change
+ * @listens hyperroute:highlight
+ * @emits hyperroute:highlight
  */
 import { HAZARD_TYPES } from '../data/hazard-types.js';
 
@@ -17,6 +23,7 @@ export function initLegend(nodes, bus) {
   // Track current hyper-route highlight so we can toggle off
   let activeRouteIdx = -1;
 
+  /** Render the default legend with type color swatches and edge indicator. */
   function renderDefaultLegend() {
     container.innerHTML = '';
     activeRouteIdx = -1;
@@ -51,6 +58,10 @@ export function initLegend(nodes, bus) {
     container.appendChild(edgeItem);
   }
 
+  /**
+   * Render hyper-route corridor entries in the legend.
+   * @param {Array} routes - Detected hyper-route corridors
+   */
   function renderRoutes(routes) {
     // Remove any existing route section
     const existing = container.querySelector('.legend-routes');

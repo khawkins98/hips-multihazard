@@ -148,12 +148,12 @@ a.badge-id:hover {
 
 .causal-link.causes::before {
   content: '\2192';
-  color: #FF5722;
+  color: var(--causes-arrow-color);
 }
 
 .causal-link.caused-by::before {
   content: '\2190';
-  color: #42A5F5;
+  color: var(--caused-by-arrow-color);
 }
 
 .causal-link.inferred {

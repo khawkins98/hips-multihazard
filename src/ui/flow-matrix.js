@@ -1,10 +1,14 @@
 /**
+ * @module ui/flow-matrix
  * Flow Matrix floating panel: 8x8 heatmap of cross-type causal edge counts.
  * Draggable, resizable, stays open while interacting with the graph.
  * Clicking a cell highlights those edges on the graph.
+ * @emits flow:highlight
  */
 import { computeFlowMatrix } from '../data/flow-matrix.js';
 import { getTypeDef } from '../data/hazard-types.js';
+import { esc, setupDrag } from '../utils/dom.js';
+import { COPY_CONFIRMATION_MS, FLOW_HEATMAP_RGB } from './constants.js';
 
 /**
  * Initialize the flow matrix panel and footer button.
@@ -51,7 +55,7 @@ export function initFlowMatrix(data, bus) {
       const intensity = val / maxVal;
       const isDiag = ri === ci;
       const cellClass = isDiag ? 'flow-cell flow-diag' : 'flow-cell';
-      const bg = val > 0 ? `rgba(91, 156, 245, ${(intensity * 0.8 + 0.1).toFixed(2)})` : 'transparent';
+      const bg = val > 0 ? `rgba(${FLOW_HEATMAP_RGB}, ${(intensity * 0.8 + 0.1).toFixed(2)})` : 'transparent';
       tableHtml += `<td class="${cellClass}" data-row="${ri}" data-col="${ci}" style="background:${bg}">${val || ''}</td>`;
     }
     tableHtml += `<td class="flow-total">${rowTotals[ri]}</td></tr>`;
@@ -88,7 +92,7 @@ export function initFlowMatrix(data, bus) {
       setTimeout(() => {
         copyBtn.textContent = 'Copy as CSV';
         copyBtn.classList.remove('copied');
-      }, 2000);
+      }, COPY_CONFIRMATION_MS);
     });
   });
 
@@ -142,45 +146,4 @@ export function initFlowMatrix(data, bus) {
 
   // Drag behavior on title bar
   setupDrag(panel, panel.querySelector('#flow-titlebar'));
-}
-
-/**
- * Make a panel draggable by its title bar.
- */
-function setupDrag(panel, handle) {
-  let dragging = false;
-  let offsetX = 0;
-  let offsetY = 0;
-
-  handle.addEventListener('mousedown', (e) => {
-    if (e.target.closest('button')) return; // don't drag from close button
-    dragging = true;
-    const rect = panel.getBoundingClientRect();
-    offsetX = e.clientX - rect.left;
-    offsetY = e.clientY - rect.top;
-    // Switch from centered transform to absolute positioning
-    if (!panel.classList.contains('dragged')) {
-      panel.style.left = rect.left + 'px';
-      panel.style.top = rect.top + 'px';
-      panel.classList.add('dragged');
-    }
-    e.preventDefault();
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (!dragging) return;
-    panel.style.left = (e.clientX - offsetX) + 'px';
-    panel.style.top = (e.clientY - offsetY) + 'px';
-  });
-
-  document.addEventListener('mouseup', () => {
-    dragging = false;
-  });
-}
-
-function esc(str) {
-  if (!str) return '';
-  const d = document.createElement('div');
-  d.textContent = String(str);
-  return d.innerHTML;
 }

@@ -1,7 +1,14 @@
 /**
- * Graph interaction handlers: tap, hover, neighborhood highlight.
+ * @module graph/interactions
+ * Graph interaction handlers: tap, hover, tooltip, neighborhood highlight.
+ * @listens (cy events: tap, mouseover, mousemove, mouseout)
+ * @emits node:selected
+ * @emits node:deselected
+ * @emits pathfinder:select
  */
 import { isPathfinderActive } from '../ui/path-finder.js';
+import { esc } from '../utils/dom.js';
+import { HIGHLIGHT_CLASSES, FOCUS_ZOOM_LEVEL, FOCUS_ANIMATION_MS, HOVER_BORDER_WIDTH } from './constants.js';
 
 /**
  * Set up interaction handlers on the Cytoscape instance.
@@ -40,7 +47,7 @@ export function setupInteractions(cy, bus) {
   // Hover effects + tooltip
   cy.on('mouseover', 'node[!isCompound]', (evt) => {
     const node = evt.target;
-    node.style('border-width', 3);
+    node.style('border-width', HOVER_BORDER_WIDTH);
     document.getElementById('cy').style.cursor = 'pointer';
 
     const d = node.data();
@@ -79,6 +86,11 @@ export function setupInteractions(cy, bus) {
   });
 }
 
+/**
+ * Create a tooltip element attached to the graph container.
+ * Returns an object with show/move/hide methods for positioning.
+ * @returns {{ show: function(string, {x: number, y: number}): void, move: function({x: number, y: number}): void, hide: function(): void }}
+ */
 function createTooltip() {
   const el = document.createElement('div');
   el.className = 'graph-tooltip';
@@ -99,13 +111,6 @@ function createTooltip() {
       el.style.display = 'none';
     },
   };
-}
-
-function esc(str) {
-  if (!str) return '';
-  const d = document.createElement('div');
-  d.textContent = String(str);
-  return d.innerHTML;
 }
 
 /**
@@ -173,7 +178,7 @@ export function highlightNeighborhood(cy, node) {
  * Clear all highlight/dim/hidden classes.
  */
 export function clearHighlights(cy) {
-  cy.elements().removeClass('dimmed highlighted highlight-hidden path-step path-highlighted');
+  cy.elements().removeClass(HIGHLIGHT_CLASSES);
 }
 
 /**
@@ -188,9 +193,9 @@ export function focusNode(cy, nodeId, bus) {
 
   cy.animate({
     center: { eles: node },
-    zoom: 2.5,
+    zoom: FOCUS_ZOOM_LEVEL,
   }, {
-    duration: 400,
+    duration: FOCUS_ANIMATION_MS,
     complete: () => {
       node.select();
       highlightNeighborhood(cy, node);

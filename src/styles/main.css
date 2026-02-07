@@ -16,6 +16,27 @@
   --detail-width: 340px;
   --radius: 6px;
   --radius-sm: 4px;
+
+  /* Semantic graph colors (mirrored in src/graph/constants.js STYLE_COLORS) */
+  --edge-color: #999;
+  --node-border-light: #fff;
+  --selected-color: #FFD600;
+  --highlighted-edge-color: #FF5722;
+  --path-color: #4CAF50;
+  --hyper-route-color: #D4AA40;
+  --success-color: #4CAF50;
+  --causes-arrow-color: #FF5722;
+  --caused-by-arrow-color: #42A5F5;
+  --flow-heatmap-rgb: 91, 156, 245;
+  --flow-active-outline: #FFD600;
+  --bg-surface-rgb: 26, 29, 39;
+
+  /* Z-index scale */
+  --z-toolbar: 20;
+  --z-tooltip: 30;
+  --z-loading: 50;
+  --z-floating-panels: 900;
+  --z-modal-overlay: 1000;
 }
 
 /* Reset */
@@ -117,7 +138,7 @@ a:hover {
   display: none;
   position: absolute;
   pointer-events: none;
-  z-index: 30;
+  z-index: var(--z-tooltip);
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -155,7 +176,7 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  z-index: 50;
+  z-index: var(--z-loading);
   transition: opacity 0.3s;
 }
 
@@ -190,7 +211,7 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-modal-overlay);
 }
 
 .overlay.hidden {
@@ -301,7 +322,7 @@ button:hover {
   border-radius: 3px;
   border: 1px solid rgba(212, 170, 64, 0.3);
   white-space: nowrap;
-  z-index: 20;
+  z-index: var(--z-toolbar);
   will-change: transform;
   transition: border-color 0.15s, background 0.15s;
 }
@@ -312,7 +333,7 @@ button:hover {
 }
 
 .hyper-route-label.active {
-  border-color: #D4AA40;
+  border-color: var(--hyper-route-color);
   background: rgba(212, 170, 64, 0.15);
 }
 
@@ -320,7 +341,7 @@ button:hover {
 .legend-divider {
   font-size: 11px;
   font-weight: 600;
-  color: #FFD600;
+  color: var(--selected-color);
   margin-top: 10px;
   margin-bottom: 4px;
   padding-top: 8px;
@@ -339,7 +360,7 @@ button:hover {
   display: inline-block;
   width: 18px;
   height: 3px;
-  background: #FFD600;
+  background: var(--selected-color);
   border-radius: 2px;
   vertical-align: middle;
   margin-right: 6px;

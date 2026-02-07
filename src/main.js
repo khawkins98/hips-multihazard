@@ -1,5 +1,11 @@
 /**
+ * @module main
  * Main entry point — orchestrates data loading, graph init, and UI wiring.
+ * Creates the event bus and connects all modules.
+ * @emits grouping:change
+ * @emits centrality:computed
+ * @listens grouping:request
+ * @listens node:focus
  */
 import { fetchHipsData } from './data/fetch-hips.js';
 import { transformToElements } from './data/transform.js';
@@ -15,22 +21,7 @@ import { initInsights } from './ui/insights.js';
 import { computeCentrality } from './data/centrality.js';
 import { initPathFinder } from './ui/path-finder.js';
 import { initFlowMatrix } from './ui/flow-matrix.js';
-
-/**
- * Create a simple publish/subscribe event bus for cross-module communication.
- * @returns {{ on: (event: string, fn: Function) => void, emit: (event: string, data: *) => void }}
- */
-function createBus() {
-  const listeners = {};
-  return {
-    on(event, fn) {
-      (listeners[event] ||= []).push(fn);
-    },
-    emit(event, data) {
-      for (const fn of listeners[event] || []) fn(data);
-    },
-  };
-}
+import { createBus } from './utils/bus.js';
 
 /**
  * Bootstrap the application: fetch data, build graph, wire up UI modules.
@@ -86,12 +77,12 @@ async function main() {
         mode,
         elements: result.elements,
       });
-      // Recompute centrality after elements are replaced
-      setTimeout(() => {
+      // Recompute centrality after layout finishes
+      cy.one('layoutstop', () => {
         const newMetrics = computeCentrality(cy);
         setCentralityData(newMetrics);
         bus.emit('centrality:computed', { metrics: newMetrics, nodeDataMap });
-      }, 100);
+      });
     });
 
     // 8. Handle node focus (from detail panel causal links or search)

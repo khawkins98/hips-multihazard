@@ -1,4 +1,5 @@
 /**
+ * @module data/flow-matrix
  * Compute a type-to-type flow matrix from edge data.
  * Counts directed edges from each hazard type to each other type.
  */

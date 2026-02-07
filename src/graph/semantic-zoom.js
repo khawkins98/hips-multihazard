@@ -1,15 +1,17 @@
 /**
+ * @module graph/semantic-zoom
  * Semantic zoom — progressively reveal labels based on zoom level.
  *
  * Levels:
  *   macro  (zoom < 0.4)  — all individual labels hidden, compound labels remain
  *   meso   (0.4–1.2)     — hub nodes (top 20% by connectivity) show labels
  *   micro  (zoom > 1.2)  — all labels visible
+ *
+ * @listens (cy zoom event)
+ * @listens grouping:change
  */
-
-const MACRO_THRESHOLD = 0.4;
-const MESO_THRESHOLD = 1.2;
-const DEBOUNCE_MS = 60;
+import { debounce } from '../utils/debounce.js';
+import { MACRO_THRESHOLD, MESO_THRESHOLD, HUB_QUANTILE, SEMANTIC_ZOOM_DEBOUNCE_MS } from './constants.js';
 
 const SZ_CLASSES = ['sz-label-hidden', 'sz-hub-label', 'sz-label-visible'];
 const SZ_EDGE_CLASSES = ['sz-edge-macro', 'sz-edge-meso', 'sz-edge-micro'];
@@ -19,6 +21,8 @@ let currentLevel = null;
 
 /**
  * Compute the connectivity threshold for hub nodes (top 20%).
+ * @param {object} cy - Cytoscape instance
+ * @returns {number} Minimum connection count for a node to be considered a hub
  */
 function computeHubThreshold(cy) {
   const counts = [];
@@ -28,12 +32,14 @@ function computeHubThreshold(cy) {
   if (counts.length === 0) return 0;
 
   counts.sort((a, b) => a - b);
-  const idx = Math.floor(counts.length * 0.8);
+  const idx = Math.floor(counts.length * HUB_QUANTILE);
   return counts[idx] || 0;
 }
 
 /**
  * Determine the semantic zoom level from a zoom value.
+ * @param {number} zoom - Current zoom level
+ * @returns {'macro'|'meso'|'micro'} Semantic zoom level
  */
 function getLevel(zoom) {
   if (zoom < MACRO_THRESHOLD) return 'macro';
@@ -43,6 +49,8 @@ function getLevel(zoom) {
 
 /**
  * Apply semantic zoom classes based on the current level.
+ * @param {object} cy - Cytoscape instance
+ * @param {'macro'|'meso'|'micro'} level - Target zoom level
  */
 function applyLevel(cy, level) {
   if (level === currentLevel) return;
@@ -79,17 +87,6 @@ function applyLevel(cy, level) {
 }
 
 /**
- * Simple debounce helper.
- */
-function debounce(fn, ms) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), ms);
-  };
-}
-
-/**
  * Initialize semantic zoom on the Cytoscape instance.
  * @param {object} cy - Cytoscape instance
  * @param {object} bus - Event bus
@@ -103,7 +100,7 @@ export function initSemanticZoom(cy, bus) {
   // Debounced zoom listener
   const onZoom = debounce(() => {
     applyLevel(cy, getLevel(cy.zoom()));
-  }, DEBOUNCE_MS);
+  }, SEMANTIC_ZOOM_DEBOUNCE_MS);
 
   cy.on('zoom', onZoom);
 
@@ -116,4 +113,13 @@ export function initSemanticZoom(cy, bus) {
       applyLevel(cy, getLevel(cy.zoom()));
     }, 0);
   });
+}
+
+/**
+ * Reset module state. Test-only API.
+ * @private
+ */
+export function _reset() {
+  hubMinConnections = 0;
+  currentLevel = null;
 }

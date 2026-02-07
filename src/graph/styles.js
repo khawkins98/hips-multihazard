@@ -1,6 +1,10 @@
 /**
- * Cytoscape stylesheet for hazard graph visualization.
+ * @module graph/styles
+ * Cytoscape stylesheet definitions for hazard graph visualization.
+ * Maps node/edge types and interaction states to visual properties.
  */
+import { STYLE_COLORS } from './constants.js';
+
 export function getStylesheet() {
   return [
     // Hazard nodes
@@ -18,7 +22,7 @@ export function getStylesheet() {
         'width': 'mapData(connectionCount, 0, 60, 20, 60)',
         'height': 'mapData(connectionCount, 0, 60, 20, 60)',
         'border-width': 2,
-        'border-color': '#fff',
+        'border-color': STYLE_COLORS.nodeBorderLight,
         'text-outline-color': 'data(color)',
         'text-outline-width': 2,
         'z-index': 10,
@@ -53,14 +57,14 @@ export function getStylesheet() {
     {
       selector: 'node[?isCompound][compoundType="cluster"]',
       style: {
-        'background-color': '#e0e0e0',
+        'background-color': STYLE_COLORS.clusterBg,
         'background-opacity': 0.15,
         'border-width': 1,
-        'border-color': '#bbb',
+        'border-color': STYLE_COLORS.clusterBorder,
         'border-style': 'dashed',
         'label': 'data(label)',
         'font-size': '11px',
-        'color': '#666',
+        'color': STYLE_COLORS.clusterText,
         'text-valign': 'top',
         'text-halign': 'center',
         'text-margin-y': -4,
@@ -74,8 +78,8 @@ export function getStylesheet() {
       selector: 'edge',
       style: {
         'width': 1.5,
-        'line-color': '#999',
-        'target-arrow-color': '#999',
+        'line-color': STYLE_COLORS.edgeColor,
+        'target-arrow-color': STYLE_COLORS.edgeColor,
         'target-arrow-shape': 'triangle',
         'curve-style': 'bezier',
         'arrow-scale': 0.8,
@@ -90,7 +94,7 @@ export function getStylesheet() {
       selector: 'node:selected',
       style: {
         'border-width': 4,
-        'border-color': '#FFD600',
+        'border-color': STYLE_COLORS.selectedColor,
         'z-index': 999,
       },
     },
@@ -100,8 +104,8 @@ export function getStylesheet() {
       selector: 'edge.highlighted',
       style: {
         'width': 3,
-        'line-color': '#FF5722',
-        'target-arrow-color': '#FF5722',
+        'line-color': STYLE_COLORS.highlightedEdgeColor,
+        'target-arrow-color': STYLE_COLORS.highlightedEdgeColor,
         'opacity': 1,
         'z-index': 999,
       },
@@ -138,7 +142,7 @@ export function getStylesheet() {
       selector: 'node.highlighted',
       style: {
         'border-width': 3,
-        'border-color': '#FFD600',
+        'border-color': STYLE_COLORS.selectedColor,
         'opacity': 1,
         'z-index': 100,
         'text-opacity': 1,
@@ -151,8 +155,8 @@ export function getStylesheet() {
       selector: 'edge.hyper-route',
       style: {
         'width': 1.5,
-        'line-color': '#D4AA40',
-        'target-arrow-color': '#D4AA40',
+        'line-color': STYLE_COLORS.hyperRouteColor,
+        'target-arrow-color': STYLE_COLORS.hyperRouteColor,
         'opacity': 0.15,
         'z-index': 50,
       },
@@ -177,7 +181,7 @@ export function getStylesheet() {
       selector: 'node.hyper-route-node',
       style: {
         'border-width': 2,
-        'border-color': '#D4AA40',
+        'border-color': STYLE_COLORS.hyperRouteColor,
         'border-opacity': 0.35,
       },
     },
@@ -198,7 +202,7 @@ export function getStylesheet() {
       selector: 'node.path-step',
       style: {
         'border-width': 3,
-        'border-color': '#4CAF50',
+        'border-color': STYLE_COLORS.pathColor,
         'opacity': 1,
         'z-index': 100,
         'text-opacity': 1,
@@ -211,8 +215,8 @@ export function getStylesheet() {
       selector: 'edge.path-highlighted',
       style: {
         'width': 4,
-        'line-color': '#4CAF50',
-        'target-arrow-color': '#4CAF50',
+        'line-color': STYLE_COLORS.pathColor,
+        'target-arrow-color': STYLE_COLORS.pathColor,
         'opacity': 1,
         'z-index': 999,
       },
@@ -222,7 +226,7 @@ export function getStylesheet() {
     {
       selector: '.dimmed',
       style: {
-        'opacity': 0.15,
+        'opacity': STYLE_COLORS.dimmedOpacity,
       },
     },
 

@@ -5,31 +5,11 @@
 import { writeFileSync, mkdirSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { str, refId, toArray } from '../src/utils/jsonld.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const API_URL = 'https://www.preventionweb.net/api/terms/hips';
 const OUT_PATH = join(__dirname, '..', 'public', 'data', 'hips.json');
-
-/** Extract a plain string from a JSON-LD value (could be string, {}, or {@language,@value}) */
-function str(val) {
-  if (!val) return '';
-  if (typeof val === 'string') return val;
-  if (val['@value']) return val['@value'];
-  return '';
-}
-
-/** Extract @id from a JSON-LD reference (could be string or {@id}) */
-function refId(val) {
-  if (!val) return null;
-  if (typeof val === 'string') return val;
-  return val['@id'] || null;
-}
-
-/** Normalize to array */
-function toArray(val) {
-  if (!val) return [];
-  return Array.isArray(val) ? val : [val];
-}
 
 /**
  * Fetch the full HIPs JSON-LD dataset from PreventionWeb, extract hazard nodes

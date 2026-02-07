@@ -1,6 +1,9 @@
 /**
- * Toolbar: zoom controls, about overlay.
+ * @module ui/toolbar
+ * Toolbar: zoom controls (in/out/fit/reset), about overlay.
  */
+import { ZOOM_FACTOR, FIT_PADDING } from '../graph/constants.js';
+import { getEl } from '../utils/dom.js';
 
 /**
  * Initialize toolbar controls.
@@ -8,39 +11,40 @@
  */
 export function initToolbar(getCy) {
   // Zoom controls
-  document.getElementById('btn-zoom-in').addEventListener('click', () => {
+  getEl('btn-zoom-in')?.addEventListener('click', () => {
     const cy = getCy();
-    if (cy) cy.zoom({ level: cy.zoom() * 1.3, renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } });
+    if (cy) cy.zoom({ level: cy.zoom() * ZOOM_FACTOR, renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } });
   });
 
-  document.getElementById('btn-zoom-out').addEventListener('click', () => {
+  getEl('btn-zoom-out')?.addEventListener('click', () => {
     const cy = getCy();
-    if (cy) cy.zoom({ level: cy.zoom() / 1.3, renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } });
+    if (cy) cy.zoom({ level: cy.zoom() / ZOOM_FACTOR, renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } });
   });
 
-  document.getElementById('btn-fit').addEventListener('click', () => {
+  getEl('btn-fit')?.addEventListener('click', () => {
     const cy = getCy();
-    if (cy) cy.fit(undefined, 30);
+    if (cy) cy.fit(undefined, FIT_PADDING);
   });
 
-  document.getElementById('btn-reset').addEventListener('click', () => {
+  getEl('btn-reset')?.addEventListener('click', () => {
     const cy = getCy();
     if (cy) {
       cy.elements().removeClass('dimmed highlighted');
       cy.elements().unselect();
-      cy.fit(undefined, 30);
+      cy.fit(undefined, FIT_PADDING);
     }
   });
 
   // About overlay
-  const aboutBtn = document.getElementById('btn-about');
-  const overlay = document.getElementById('about-overlay');
+  const aboutBtn = getEl('btn-about');
+  const overlay = getEl('about-overlay');
+  if (!overlay) return;
   const closeBtn = overlay.querySelector('.overlay-close');
 
   populateAbout();
 
-  aboutBtn.addEventListener('click', () => overlay.classList.remove('hidden'));
-  closeBtn.addEventListener('click', () => overlay.classList.add('hidden'));
+  aboutBtn?.addEventListener('click', () => overlay.classList.remove('hidden'));
+  closeBtn?.addEventListener('click', () => overlay.classList.add('hidden'));
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) overlay.classList.add('hidden');
   });
@@ -48,7 +52,8 @@ export function initToolbar(getCy) {
 
 /** Fill the about overlay with usage instructions, data provenance, and attribution. */
 function populateAbout() {
-  const body = document.getElementById('about-body');
+  const body = getEl('about-body');
+  if (!body) return;
   body.innerHTML = `
     <h3>About this project</h3>
     <p>A network graph of the <strong>Hazard Information Profiles (HIPs)</strong> from

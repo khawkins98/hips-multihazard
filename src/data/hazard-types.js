@@ -1,6 +1,7 @@
 /**
- * 8 HIPs hazard type definitions with colors and labels.
- * Colors chosen for accessibility and distinctiveness.
+ * @module data/hazard-types
+ * 8 HIPs hazard type definitions with colors, short labels, and icons.
+ * Colors chosen for accessibility and distinctiveness on dark backgrounds.
  */
 export const HAZARD_TYPES = {
   'Meteorological and Hydrological': {

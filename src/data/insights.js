@@ -1,7 +1,11 @@
 /**
+ * @module data/insights
  * Compute network-level insights/factoids from the snapshot data.
  * Pure computation — no DOM or Cytoscape dependencies.
- *
+ */
+
+/**
+ * Compute network-level insights/factoids from the snapshot data.
  * @param {Object} data - Snapshot data with nodes, edges
  * @returns {Object} Computed insights for the 9 factoid cards
  */

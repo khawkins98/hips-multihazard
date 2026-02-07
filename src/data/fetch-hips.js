@@ -1,8 +1,26 @@
 /**
+ * @module data/fetch-hips
  * Fetches HIPs data from the local snapshot (preferred) or live API.
+ * Falls back to a minimal client-side JSON-LD transform if the snapshot is unavailable.
  */
+import { str, refId, toArray } from '../utils/jsonld.js';
+
 const SNAPSHOT_URL = import.meta.env.BASE_URL + 'data/hips.json';
 const API_URL = 'https://www.preventionweb.net/api/terms/hips';
+
+/**
+ * Validate that data has the expected shape with nodes and edges arrays.
+ * @param {object} data - Data to validate
+ * @throws {Error} If data shape is invalid
+ */
+function validateData(data) {
+  if (!data || !Array.isArray(data.nodes)) {
+    throw new Error('Invalid data: missing nodes array');
+  }
+  if (!Array.isArray(data.edges)) {
+    throw new Error('Invalid data: missing edges array');
+  }
+}
 
 /**
  * Load HIPs hazard data, trying the local snapshot first and falling back to the live API.
@@ -15,6 +33,7 @@ export async function fetchHipsData() {
     if (res.ok) {
       const data = await res.json();
       if (data.nodes && data.edges) {
+        validateData(data);
         console.log(`Loaded snapshot: ${data.nodes.length} nodes, ${data.edges.length} edges`);
         return data;
       }
@@ -30,28 +49,9 @@ export async function fetchHipsData() {
   const raw = await res.json();
 
   // Do a minimal client-side transform (the snapshot.js script does this more thoroughly)
-  return transformRawApi(raw);
-}
-
-/** Extract a plain string from a JSON-LD value ({@language, @value} or string). */
-function str(val) {
-  if (!val) return '';
-  if (typeof val === 'string') return val;
-  if (val['@value']) return val['@value'];
-  return '';
-}
-
-/** Extract the @id URI from a JSON-LD reference ({@id} or string). */
-function refId(val) {
-  if (!val) return null;
-  if (typeof val === 'string') return val;
-  return val['@id'] || null;
-}
-
-/** Normalize a value to an array (handles null, single value, or existing array). */
-function toArray(val) {
-  if (!val) return [];
-  return Array.isArray(val) ? val : [val];
+  const result = transformRawApi(raw);
+  validateData(result);
+  return result;
 }
 
 /**

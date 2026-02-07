@@ -236,6 +236,7 @@ a.badge-id:hover {
 .khop-btn:hover {
   border-color: var(--accent);
   color: var(--accent);
+  background: rgba(91, 156, 245, 0.08);
 }
 
 .khop-btn.active {

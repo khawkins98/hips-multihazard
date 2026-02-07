@@ -182,7 +182,7 @@
 
 .layout-btn:hover {
   background: var(--bg-elevated);
-  border-color: var(--border);
+  border-color: var(--text-muted);
 }
 
 .layout-btn.active {

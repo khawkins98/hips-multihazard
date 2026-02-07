@@ -313,8 +313,13 @@ button {
 }
 
 button:hover {
+  background: #2e3347;
+  border-color: var(--text-muted);
+}
+
+button:active {
   background: var(--border);
-  border-color: var(--text-dim);
+  transform: scale(0.98);
 }
 
 /* Hyper-route floating labels */

@@ -126,7 +126,7 @@ const CARDS = [
 ];
 
 /**
- * Initialize the insights drawer.
+ * Initialize the insights panel.
  * @param {Object} insights - Computed insights from computeInsights()
  * @param {Object} data - Raw snapshot data (unused but available for future cards)
  * @param {Object} eventBus - Event bus
@@ -134,23 +134,21 @@ const CARDS = [
 export function initInsights(insights, data, eventBus) {
   bus = eventBus;
 
-  const container = document.getElementById('graph-container');
-
-  // Build drawer
+  // Build floating panel
   drawerEl = document.createElement('div');
-  drawerEl.id = 'insights-drawer';
-  drawerEl.className = 'insights-drawer';
-  drawerEl.innerHTML = buildDrawerHTML(insights);
-  container.appendChild(drawerEl);
+  drawerEl.id = 'insights-panel';
+  drawerEl.className = 'insights-panel hidden';
+  drawerEl.innerHTML = buildPanelHTML(insights);
+  document.body.appendChild(drawerEl);
 
   // Toggle button
   const toggleBtn = document.getElementById('btn-insights');
   if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => toggleDrawer(insights));
+    toggleBtn.addEventListener('click', () => togglePanel(insights));
   }
 
-  // Close button inside drawer
-  drawerEl.querySelector('.insights-close').addEventListener('click', () => closeDrawer());
+  // Close button inside panel
+  drawerEl.querySelector('.insights-close').addEventListener('click', () => closePanel());
 
   // Card click handlers
   drawerEl.querySelectorAll('.insight-card').forEach((cardEl) => {
@@ -160,7 +158,6 @@ export function initInsights(insights, data, eventBus) {
 
     cardEl.addEventListener('click', () => {
       if (activeCard === cardId) {
-        // Toggle off
         clearActive();
         bus.emit('insight:highlight', { clear: true });
         return;
@@ -178,8 +175,8 @@ export function initInsights(insights, data, eventBus) {
 
   // ESC to close
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && drawerEl.classList.contains('open')) {
-      closeDrawer();
+    if (e.key === 'Escape' && !drawerEl.classList.contains('hidden')) {
+      closePanel();
     }
   });
 
@@ -187,14 +184,18 @@ export function initInsights(insights, data, eventBus) {
   bus.on('node:selected', () => {
     clearActive();
   });
+
+  // Drag behavior on title bar
+  setupDrag(drawerEl, drawerEl.querySelector('.insights-titlebar'));
 }
 
-function buildDrawerHTML(insights) {
+function buildPanelHTML(insights) {
   let html = `
-    <div class="insights-header">
+    <div class="insights-titlebar">
       <span class="insights-title">Network Insights</span>
       <button class="insights-close" title="Close">&times;</button>
     </div>
+    <div class="insights-panel-body">
     <div class="insights-grid">
   `;
 
@@ -214,20 +215,20 @@ function buildDrawerHTML(insights) {
     `;
   }
 
-  html += `</div>`;
+  html += `</div></div>`;
   return html;
 }
 
-function toggleDrawer(insights) {
-  if (drawerEl.classList.contains('open')) {
-    closeDrawer();
+function togglePanel(insights) {
+  if (!drawerEl.classList.contains('hidden')) {
+    closePanel();
   } else {
-    openDrawer(insights);
+    openPanel(insights);
   }
 }
 
-function openDrawer(insights) {
-  drawerEl.classList.add('open');
+function openPanel(insights) {
+  drawerEl.classList.remove('hidden');
   document.getElementById('btn-insights')?.classList.add('active');
   if (!hasAnimated) {
     hasAnimated = true;
@@ -235,8 +236,8 @@ function openDrawer(insights) {
   }
 }
 
-function closeDrawer() {
-  drawerEl.classList.remove('open');
+function closePanel() {
+  drawerEl.classList.add('hidden');
   document.getElementById('btn-insights')?.classList.remove('active');
   clearActive();
   bus.emit('insight:highlight', { clear: true });
@@ -291,6 +292,40 @@ function formatValue(current, format, target) {
   if (format === 'decimal') return current.toFixed(1);
   // int
   return Math.round(current).toLocaleString();
+}
+
+/**
+ * Make a panel draggable by its title bar.
+ */
+function setupDrag(panel, handle) {
+  let dragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  handle.addEventListener('mousedown', (e) => {
+    if (e.target.closest('button')) return;
+    dragging = true;
+    const rect = panel.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+    if (!panel.classList.contains('dragged')) {
+      panel.style.left = rect.left + 'px';
+      panel.style.top = rect.top + 'px';
+      panel.style.bottom = 'auto';
+      panel.classList.add('dragged');
+    }
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    panel.style.left = (e.clientX - offsetX) + 'px';
+    panel.style.top = (e.clientY - offsetY) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    dragging = false;
+  });
 }
 
 function esc(str) {

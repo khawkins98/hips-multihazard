@@ -1,19 +1,20 @@
 /**
- * Flow Matrix overlay: 8x8 heatmap of cross-type causal edge counts.
+ * Flow Matrix floating panel: 8x8 heatmap of cross-type causal edge counts.
+ * Draggable, resizable, stays open while interacting with the graph.
  * Clicking a cell highlights those edges on the graph.
  */
 import { computeFlowMatrix } from '../data/flow-matrix.js';
 import { getTypeDef } from '../data/hazard-types.js';
 
 /**
- * Initialize the flow matrix overlay and button.
+ * Initialize the flow matrix panel and footer button.
  * @param {object} data - Snapshot data
  * @param {object} bus - Event bus
  */
 export function initFlowMatrix(data, bus) {
   const btn = document.getElementById('btn-flow-matrix');
-  const overlay = document.getElementById('flow-overlay');
-  if (!btn || !overlay) return;
+  const panel = document.getElementById('flow-panel');
+  if (!btn || !panel) return;
 
   const { typeNames, matrix, edgeMap } = computeFlowMatrix(data);
 
@@ -65,9 +66,31 @@ export function initFlowMatrix(data, bus) {
   tableHtml += `<td class="flow-total flow-grand-total">${grandTotal}</td></tr>`;
   tableHtml += '</table>';
 
-  // Populate overlay
-  const body = overlay.querySelector('#flow-body');
-  body.innerHTML = tableHtml;
+  // Build CSV string
+  const csvRows = [];
+  csvRows.push(['Source \\ Target', ...shortNames, 'Total'].join(','));
+  for (let ri = 0; ri < typeNames.length; ri++) {
+    csvRows.push([shortNames[ri], ...matrix[ri], rowTotals[ri]].join(','));
+  }
+  csvRows.push(['Total', ...colTotals, grandTotal].join(','));
+  const csvString = csvRows.join('\n');
+
+  // Populate panel body
+  const body = panel.querySelector('#flow-body');
+  body.innerHTML = `<div class="flow-toolbar"><button class="flow-copy-btn" id="flow-copy-csv">Copy as CSV</button></div>` + tableHtml;
+
+  // Copy CSV handler
+  body.querySelector('#flow-copy-csv').addEventListener('click', (e) => {
+    const copyBtn = e.currentTarget;
+    navigator.clipboard.writeText(csvString).then(() => {
+      copyBtn.textContent = 'Copied!';
+      copyBtn.classList.add('copied');
+      setTimeout(() => {
+        copyBtn.textContent = 'Copy as CSV';
+        copyBtn.classList.remove('copied');
+      }, 2000);
+    });
+  });
 
   // Track active cell
   let activeCell = null;
@@ -81,14 +104,12 @@ export function initFlowMatrix(data, bus) {
       const edges = edgeMap.get(key);
 
       if (activeCell === td) {
-        // Deselect
         td.classList.remove('active');
         activeCell = null;
         bus.emit('flow:highlight', { edges: [], clear: true });
         return;
       }
 
-      // Deselect previous
       if (activeCell) activeCell.classList.remove('active');
 
       if (!edges || edges.length === 0) {
@@ -102,15 +123,15 @@ export function initFlowMatrix(data, bus) {
     });
   });
 
-  // Toggle overlay
+  // Toggle panel
   btn.addEventListener('click', () => {
-    const isHidden = overlay.classList.toggle('hidden');
+    const isHidden = panel.classList.toggle('hidden');
     btn.classList.toggle('active', !isHidden);
   });
 
   // Close button
-  overlay.querySelector('.overlay-close').addEventListener('click', () => {
-    overlay.classList.add('hidden');
+  panel.querySelector('#flow-panel-close').addEventListener('click', () => {
+    panel.classList.add('hidden');
     btn.classList.remove('active');
     if (activeCell) {
       activeCell.classList.remove('active');
@@ -119,17 +140,41 @@ export function initFlowMatrix(data, bus) {
     }
   });
 
-  // Close on overlay background click
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) {
-      overlay.classList.add('hidden');
-      btn.classList.remove('active');
-      if (activeCell) {
-        activeCell.classList.remove('active');
-        activeCell = null;
-        bus.emit('flow:highlight', { edges: [], clear: true });
-      }
+  // Drag behavior on title bar
+  setupDrag(panel, panel.querySelector('#flow-titlebar'));
+}
+
+/**
+ * Make a panel draggable by its title bar.
+ */
+function setupDrag(panel, handle) {
+  let dragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  handle.addEventListener('mousedown', (e) => {
+    if (e.target.closest('button')) return; // don't drag from close button
+    dragging = true;
+    const rect = panel.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+    // Switch from centered transform to absolute positioning
+    if (!panel.classList.contains('dragged')) {
+      panel.style.left = rect.left + 'px';
+      panel.style.top = rect.top + 'px';
+      panel.classList.add('dragged');
     }
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    panel.style.left = (e.clientX - offsetX) + 'px';
+    panel.style.top = (e.clientY - offsetY) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    dragging = false;
   });
 }
 

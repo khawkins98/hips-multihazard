@@ -131,10 +131,12 @@
     </div>
   </div>
 
-  <div id="flow-overlay" class="overlay hidden">
-    <div class="overlay-content">
-      <button class="overlay-close">&times;</button>
-      <h2>Type-to-Type Flow Matrix</h2>
+  <div id="flow-panel" class="flow-panel hidden">
+    <div class="flow-panel-titlebar" id="flow-titlebar">
+      <span class="flow-panel-title">Type-to-Type Flow Matrix</span>
+      <button class="flow-panel-close" id="flow-panel-close">&times;</button>
+    </div>
+    <div class="flow-panel-body">
       <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Directed causal edge counts between hazard types. Click a cell to highlight those edges on the graph.</p>
       <div id="flow-body"></div>
     </div>

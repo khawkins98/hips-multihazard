@@ -1,32 +1,47 @@
-/* Insights bottom drawer */
-.insights-drawer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  max-height: 260px;
-  background: rgba(26, 29, 39, 0.95);
-  border-top: 1px solid var(--border);
-  backdrop-filter: blur(8px);
-  transform: translateY(100%);
-  transition: transform 0.3s ease;
-  z-index: 40;
+/* Insights floating panel */
+.insights-panel {
+  position: fixed;
+  z-index: 900;
+  min-width: 400px;
+  max-width: 90vw;
+  max-height: 80vh;
+  resize: both;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  background: rgba(26, 29, 39, 0.95);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  /* Default position: bottom-center of viewport */
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-.insights-drawer.open {
-  transform: translateY(0);
+.insights-panel.hidden {
+  display: none;
 }
 
-/* Header row */
-.insights-header {
+.insights-panel.dragged {
+  transform: none;
+}
+
+/* Title bar — drag handle */
+.insights-titlebar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 14px 4px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  cursor: grab;
+  user-select: none;
   flex-shrink: 0;
+}
+
+.insights-titlebar:active {
+  cursor: grabbing;
 }
 
 .insights-title {
@@ -50,14 +65,18 @@
   background: none;
 }
 
+/* Scrollable body */
+.insights-panel-body {
+  overflow: auto;
+  flex: 1;
+}
+
 /* Card grid */
 .insights-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 8px;
-  padding: 4px 14px 12px;
-  overflow-y: auto;
-  flex: 1;
+  padding: 8px 14px 12px;
 }
 
 /* Category headers span full grid width */

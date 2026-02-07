@@ -5,14 +5,111 @@
   color: var(--bg);
 }
 
-/* Flow Matrix overlay */
-#flow-overlay .overlay-content {
-  max-width: 700px;
-  width: 95vw;
+/* Floating panel */
+.flow-panel {
+  position: fixed;
+  z-index: 900;
+  min-width: 480px;
+  max-width: 90vw;
+  max-height: 85vh;
+  resize: both;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  /* Default position: centered */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.flow-panel.hidden {
+  display: none;
+}
+
+/* Dragged state: once the user drags, we remove the centering transform */
+.flow-panel.dragged {
+  transform: none;
+}
+
+/* Title bar — drag handle */
+.flow-panel-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  cursor: grab;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.flow-panel-titlebar:active {
+  cursor: grabbing;
+}
+
+.flow-panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.flow-panel-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.flow-panel-close:hover {
+  color: var(--text);
+  background: none;
+}
+
+/* Scrollable body */
+.flow-panel-body {
+  padding: 12px 16px;
+  overflow: auto;
+  flex: 1;
 }
 
 #flow-body {
   overflow-x: auto;
+}
+
+/* Toolbar above table */
+.flow-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 6px;
+}
+
+.flow-copy-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.flow-copy-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.flow-copy-btn.copied {
+  border-color: #4CAF50;
+  color: #4CAF50;
 }
 
 /* Table */

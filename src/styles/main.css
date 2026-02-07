@@ -285,6 +285,92 @@ button:hover {
   border-color: var(--text-dim);
 }
 
+/* Hyper-route floating labels */
+.hyper-route-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: auto;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  color: #e8d5a0;
+  opacity: 0.85;
+  background: rgba(15, 17, 23, 0.75);
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid rgba(212, 170, 64, 0.3);
+  white-space: nowrap;
+  z-index: 20;
+  will-change: transform;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.hyper-route-label:hover {
+  border-color: rgba(212, 170, 64, 0.6);
+  background: rgba(15, 17, 23, 0.9);
+}
+
+.hyper-route-label.active {
+  border-color: #D4AA40;
+  background: rgba(212, 170, 64, 0.15);
+}
+
+/* Legend: hyper-route section */
+.legend-divider {
+  font-size: 11px;
+  font-weight: 600;
+  color: #FFD600;
+  margin-top: 10px;
+  margin-bottom: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  letter-spacing: 0.3px;
+}
+
+.legend-route-subtitle {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.legend-route-line {
+  display: inline-block;
+  width: 18px;
+  height: 3px;
+  background: #FFD600;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.legend-route-badge {
+  font-size: 10px;
+  color: var(--text-dim);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 5px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.legend-route-item {
+  transition: background 0.15s;
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
+}
+
+.legend-route-item:hover {
+  background: var(--bg-elevated);
+}
+
+.legend-route-item.active {
+  background: rgba(255, 214, 0, 0.1);
+}
+
 /* Checkbox / radio styling */
 input[type="checkbox"],
 input[type="radio"] {

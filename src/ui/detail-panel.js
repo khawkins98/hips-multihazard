@@ -27,6 +27,10 @@ export function initDetailPanel(dataMap, eventBus) {
 
   bus.on('node:selected', ({ id }) => showDetail(id));
   bus.on('node:deselected', hideDetail);
+
+  bus.on('grouping:change', () => {
+    hideDetail();
+  });
 }
 
 /**
@@ -45,14 +49,16 @@ function showDetail(nodeId) {
   content.classList.remove('hidden');
 
   const typeDef = getTypeDef(data.typeName);
+  const typeSlug = (data.typeName || '').toLowerCase().replace(/\s+/g, '-');
+  const hipsBase = 'https://www.preventionweb.net/drr-glossary/hips';
 
   let html = `
     <div class="detail-header">
       <div class="detail-title">${esc(data.label)}</div>
       <div class="detail-badges">
-        <span class="badge badge-type" style="background:${typeDef.color}">${esc(data.typeName || 'Unknown')}</span>
-        ${data.clusterName ? `<span class="badge badge-cluster">${esc(data.clusterName)}</span>` : ''}
-        ${data.identifier ? `<span class="badge badge-id">${esc(data.identifier)}</span>` : ''}
+        <a class="badge badge-type" style="background:${typeDef.color}" href="${hipsBase}#${esc(typeSlug)}" target="_blank" rel="noopener">${esc(data.typeName || 'Unknown')}</a>
+        ${data.clusterName ? `<a class="badge badge-cluster" href="${hipsBase}#${esc(typeSlug)}" target="_blank" rel="noopener">${esc(data.clusterName)}</a>` : ''}
+        ${data.id?.startsWith('http') ? `<a class="badge badge-id" href="${esc(data.id)}" target="_blank" rel="noopener">${esc(data.identifier || data.id)}</a>` : (data.identifier ? `<span class="badge badge-id">${esc(data.identifier)}</span>` : '')}
       </div>
     </div>
   `;

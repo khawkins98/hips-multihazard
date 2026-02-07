@@ -68,9 +68,16 @@ function initTypeFilters(data, bus) {
 /** Bind grouping radio buttons to emit 'grouping:request' events. */
 function initGroupingControls(bus) {
   const radios = document.querySelectorAll('#grouping-controls input[name="grouping"]');
+  const layoutBtns = document.querySelectorAll('.layout-btn');
+
   for (const radio of radios) {
     radio.addEventListener('change', () => {
       if (radio.checked) {
+        // Reset active layout button to Hyperspace on grouping change
+        layoutBtns.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.layout === 'hyperspace');
+        });
+
         bus.emit('grouping:request', { mode: radio.value });
       }
     });

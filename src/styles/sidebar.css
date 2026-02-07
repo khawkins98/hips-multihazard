@@ -145,3 +145,9 @@
   border-radius: 50%;
   border: 1.5px solid #fff;
 }
+
+/* Disabled section (corridor mode) */
+.disabled-section {
+  opacity: 0.35;
+  pointer-events: none;
+}

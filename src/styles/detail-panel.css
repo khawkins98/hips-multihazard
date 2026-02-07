@@ -71,6 +71,23 @@
   text-transform: none;
 }
 
+/* Linked badges */
+a.badge {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a.badge:hover {
+  filter: brightness(1.2);
+}
+
+a.badge-cluster:hover,
+a.badge-id:hover {
+  filter: none;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 /* Definition */
 .detail-definition {
   font-size: 13px;

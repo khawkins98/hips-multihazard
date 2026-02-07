@@ -65,7 +65,7 @@
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: var(--radius-pill);
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
@@ -288,7 +288,7 @@ a.badge-id:hover {
   background: var(--bg-elevated);
   color: var(--accent);
   padding: 1px 6px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   font-size: 10px;
   font-weight: 600;
 }
@@ -304,6 +304,6 @@ a.badge-id:hover {
   background: var(--bg-elevated);
   color: var(--text-muted);
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: var(--radius-pill);
   font-size: 11px;
 }

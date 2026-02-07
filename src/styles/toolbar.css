@@ -20,7 +20,7 @@
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 #toolbar button:hover {
@@ -77,7 +77,7 @@
   list-style: none;
   z-index: 200;
   display: none;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  box-shadow: var(--shadow-lg);
 }
 
 #search-results.visible {
@@ -106,7 +106,7 @@
 #search-results .result-swatch {
   width: 8px;
   height: 8px;
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   flex-shrink: 0;
 }
 

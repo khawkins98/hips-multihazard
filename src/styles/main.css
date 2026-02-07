@@ -16,7 +16,12 @@
   --detail-width: 340px;
   --radius: 6px;
   --radius-sm: 4px;
+  --radius-lg: 8px;
+  --radius-pill: 10px;
   --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
 
   /* Semantic graph colors (mirrored in src/graph/constants.js STYLE_COLORS) */
   --edge-color: #999;
@@ -152,7 +157,7 @@ a:hover {
   font-size: 12px;
   line-height: 1.5;
   color: var(--text);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  box-shadow: var(--shadow-md);
   max-width: 260px;
   white-space: nowrap;
 }

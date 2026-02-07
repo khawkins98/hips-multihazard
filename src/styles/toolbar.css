@@ -122,6 +122,13 @@
   color: var(--text-dim);
 }
 
+.search-no-results {
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: default;
+  pointer-events: none;
+}
+
 /* About button */
 #btn-about {
   background: transparent;

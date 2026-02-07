@@ -35,8 +35,9 @@ export function initSearch(nodes, eventBus) {
     activeIndex = -1;
 
     if (matches.length === 0) {
-      results.classList.remove('visible');
-      input.setAttribute('aria-expanded', 'false');
+      results.innerHTML = `<li class="search-no-results">No hazards found</li>`;
+      results.classList.add('visible');
+      input.setAttribute('aria-expanded', 'true');
       return;
     }
 

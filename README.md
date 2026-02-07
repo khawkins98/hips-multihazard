@@ -17,7 +17,7 @@ Features:
 - Filter by hazard type, toggle all causal links on/off
 - **Declared-only mode**: filter edges to show only mutually acknowledged relationships, with the layout recomputing to reflect the reduced edge set
 
-### Research Tools
+### Research tools
 
 - **K-hop neighborhood expansion**: after selecting a node, expand the visible neighborhood to 2, 3, or 4 hops to trace cascading causal chains
 - **Centrality metrics**: betweenness, PageRank, and closeness centrality computed for all nodes, shown in the detail panel with ranks and as a sortable top-20 sidebar list
@@ -45,20 +45,20 @@ Data is fetched from the [PreventionWeb HIPs API](https://www.preventionweb.net/
 - **Dublin Core** for metadata and provenance
 - **PROV-O** for source attribution
 
-## Methodology: Declared vs Inferred Connections
+## Methodology: declared vs inferred connections
 
-The HIPs ontology stores causal relationships using `xkos:causes` and `xkos:causedBy` predicates. Although XKOS defines these as inverse properties, the dataset does not enforce symmetry: node A may declare `causes: [B]` without node B listing A in its `causedBy` array. This creates two categories of causal connections, reflecting editorial coverage rather than causal strength:
+The HIPs ontology stores causal relationships using `xkos:causes` and `xkos:causedBy` predicates. Although XKOS defines these as inverse properties, the dataset does not enforce symmetry: node A may declare `causes: [B]` without node B listing A in its `causedBy` array. This produces two categories of causal connections that reflect editorial coverage rather than causal strength:
 
-- **Declared** (reciprocated) — the relationship is attested by both endpoints. The source lists the target in `causes` *and* the target lists the source in `causedBy`, or vice versa.
-- **Inferred** (unreciprocated) — the relationship is attested by only one side. Another node declares `causes: [thisNode]`, but this node's `causedBy` array does not acknowledge it. No algorithmic inference is performed; the term refers to the edge being observable in the graph without mutual acknowledgment.
+- **Declared** (reciprocated): the relationship is attested by both endpoints. The source lists the target in `causes` *and* the target lists the source in `causedBy`, or vice versa.
+- **Inferred** (unreciprocated): the relationship is attested by only one side. Another node declares `causes: [thisNode]`, but this node's `causedBy` array does not acknowledge it. No algorithmic inference is performed; the term just means the edge is observable in the graph without mutual acknowledgment.
 
-All edges are built from `xkos:causes` declarations, so every edge has at least one editorial attestation. The detail panel and sidebar "Declared only" toggle distinguish the two categories so users can gauge which links have cross-validated editorial support. When the declared-only filter is active, the graph layout recomputes to reflect the reduced edge set, revealing the structural difference between the reciprocated causal network and the full graph. The "Most connected" insight card shows total graph degree alongside the declared count for the same reason.
+All edges are built from `xkos:causes` declarations, so every edge has at least one editorial attestation. The detail panel and sidebar "Declared only" toggle distinguish the two categories so users can see which links have cross-validated editorial support. When the declared-only filter is active, the graph layout recomputes to reflect the reduced edge set, showing the structural difference between the reciprocated causal network and the full graph. The "Most connected" insight card shows total graph degree alongside the declared count for the same reason.
 
-For example, TL0405 (Road Traffic Accident) has 24 declared connections (7 causes + 17 causedBy) but a graph degree of 63, because 39 additional nodes declare they cause road traffic accidents without TL0405 listing them. The asymmetry is likely an artifact of node-by-node curation rather than an ontological feature — see [docs/methodology-causal-asymmetry.md](docs/methodology-causal-asymmetry.md) for a detailed analysis.
+For example, TL0405 (Road Traffic Accident) has 24 declared connections (7 causes + 17 causedBy) but a graph degree of 63, because 39 additional nodes declare they cause road traffic accidents without TL0405 listing them. The asymmetry is an artifact of node-by-node curation rather than an ontological feature. See [docs/methodology-causal-asymmetry.md](docs/methodology-causal-asymmetry.md) for a full analysis.
 
 ## References
 
-### Multi-Hazard Ontology & Classification
+### Multi-hazard ontology and classification
 
 - UNDRR/ISC (2020). *Hazard Definition and Classification Review: Technical Report.* United Nations Office for Disaster Risk Reduction & International Science Council. https://www.undrr.org/publication/hazard-definition-and-classification-review
 - Murray, V. et al. (2021). "Hazard Information Profiles: Supplement to UNDRR-ISC Hazard Definition & Classification Review." *UNDRR/ISC Technical Report.*
@@ -67,13 +67,13 @@ For example, TL0405 (Road Traffic Accident) has 24 declared connections (7 cause
 - Kappes, M.S., Keiler, M., von Elverfeldt, K. & Glade, T. (2012). "Challenges of analyzing multi-hazard risk: a review." *Natural Hazards*, 64(2), 1925–1958.
 - De Angeli, S., Malamud, B.D., Rossi, L., Taylor, F.E., Trasforini, E. & Rudari, R. (2022). "A multi-hazard framework for spatial-temporal impact analysis." *International Journal of Disaster Risk Reduction*, 73, 102829.
 
-### Visualization & Knowledge Organization
+### Visualization and knowledge organization
 
 - Franz, M., Lopes, C.T., Huck, G., Dong, Y., Sumer, O. & Bader, G.D. (2016). "Cytoscape.js: a graph theory library for visualisation and analysis." *Bioinformatics*, 32(2), 309–311.
 - Miles, A. & Bechhofer, S. (2009). "SKOS Simple Knowledge Organization System Reference." *W3C Recommendation*. https://www.w3.org/TR/skos-reference/
 - Cotton, F., Kunz, M., Dottori, F. & Stocker, D. (2023). "Multi-hazard and systemic framework for risk-informed decision making." *EU Horizon Technical Report.*
 
-### Corridor View Inspirations
+### Corridor view inspirations
 
 - Tobler, W.R. (1987). "Experiments in migration mapping by computer." *The American Cartographer*, 14(2), 155–163. (Origin of flow maps as a cartographic technique for showing aggregate movement between regions.)
 - Phan, D., Xiao, L., Yeh, R., Hanrahan, P. & Winograd, T. (2005). "Flow Map Layout." *IEEE Symposium on Information Visualization (InfoVis)*. (Automated layout algorithms for edge-bundled flow maps.)

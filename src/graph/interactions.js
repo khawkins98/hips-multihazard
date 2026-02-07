@@ -92,7 +92,7 @@ function esc(str) {
 
 /**
  * Highlight a node's direct causal neighborhood.
- * Connected edges and neighbor nodes are highlighted; everything else is dimmed.
+ * Connected edges are highlighted; unrelated edges are hidden; other nodes are dimmed.
  */
 export function highlightNeighborhood(cy, node) {
   clearHighlights(cy);
@@ -100,13 +100,14 @@ export function highlightNeighborhood(cy, node) {
   const connectedEdges = node.connectedEdges();
   const neighbors = connectedEdges.connectedNodes();
 
-  // Dim everything
-  cy.elements().addClass('dimmed');
+  // Dim all nodes, hide all edges
+  cy.nodes().addClass('dimmed');
+  cy.edges().addClass('highlight-hidden');
 
-  // Un-dim the selected node, its neighbors, and connected edges
+  // Un-dim the selected node, its neighbors; show connected edges
   node.removeClass('dimmed').addClass('highlighted');
   neighbors.removeClass('dimmed').addClass('highlighted');
-  connectedEdges.removeClass('dimmed').addClass('highlighted');
+  connectedEdges.removeClass('highlight-hidden').addClass('highlighted');
 
   // Also un-dim compound parents
   node.ancestors().removeClass('dimmed');
@@ -114,10 +115,10 @@ export function highlightNeighborhood(cy, node) {
 }
 
 /**
- * Clear all highlight/dim classes.
+ * Clear all highlight/dim/hidden classes.
  */
 export function clearHighlights(cy) {
-  cy.elements().removeClass('dimmed highlighted');
+  cy.elements().removeClass('dimmed highlighted highlight-hidden');
 }
 
 /**

@@ -359,9 +359,25 @@ export function initHyperRouteLabels(cy, bus) {
       el.className = 'hyper-route-label';
       el.textContent = route.label;
       el.dataset.edgeCount = route.edgeCount;
-      el.title = `${route.edgeCount} cross-type causal links`;
+      el.title = `${route.edgeCount} cross-type causal links — click to highlight`;
       el._modelX = modelX;
       el._modelY = modelY;
+      el._route = route;
+
+      el.addEventListener('click', () => {
+        // Toggle: if already active, clear; otherwise highlight this route
+        const wasActive = el.classList.contains('active');
+        // Clear active state on all labels
+        for (const lbl of labelEls) lbl.classList.remove('active');
+
+        if (wasActive) {
+          bus.emit('hyperroute:highlight', { route: null, routeIdx: -1 });
+        } else {
+          el.classList.add('active');
+          bus.emit('hyperroute:highlight', { route, routeIdx: -1 });
+        }
+      });
+
       container.appendChild(el);
       labelEls.push(el);
     }

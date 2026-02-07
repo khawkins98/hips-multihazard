@@ -60,20 +60,21 @@ export function initGraph(elements, bus) {
     });
   }
 
-  // Listen for hyper-route highlight from legend clicks
+  // Listen for hyper-route highlight from legend/label clicks
   bus.on('hyperroute:highlight', ({ route }) => {
     if (!route) {
       // Clear highlight
-      cy.elements().removeClass('dimmed highlighted');
+      cy.elements().removeClass('dimmed highlighted highlight-hidden');
       return;
     }
-    // Dim everything, then highlight the route's edges and bridge nodes
-    cy.elements().addClass('dimmed');
+    // Dim all nodes, hide all edges, then show only route's edges and bridge nodes
+    cy.nodes().addClass('dimmed');
+    cy.edges().addClass('highlight-hidden');
     cy.batch(() => {
       for (const edgeId of route.edgeIds) {
         const edge = cy.getElementById(edgeId);
         if (edge && !edge.empty()) {
-          edge.removeClass('dimmed').addClass('highlighted');
+          edge.removeClass('highlight-hidden').addClass('highlighted');
         }
       }
       for (const nodeId of route.bridgeNodes) {

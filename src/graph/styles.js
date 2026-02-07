@@ -209,5 +209,13 @@ export function getStylesheet() {
       },
     },
 
+    // Hidden during highlight (separate from filter/toggle hidden)
+    {
+      selector: '.highlight-hidden',
+      style: {
+        'display': 'none',
+      },
+    },
+
   ];
 }

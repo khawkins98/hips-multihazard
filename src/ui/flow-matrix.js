@@ -144,6 +144,19 @@ export function initFlowMatrix(data, bus) {
     }
   });
 
+  // ESC to close
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !panel.classList.contains('hidden')) {
+      panel.classList.add('hidden');
+      btn.classList.remove('active');
+      if (activeCell) {
+        activeCell.classList.remove('active');
+        activeCell = null;
+        bus.emit('flow:highlight', { edges: [], clear: true });
+      }
+    }
+  });
+
   // Drag behavior on title bar
   setupDrag(panel, panel.querySelector('#flow-titlebar'));
 }

@@ -27,6 +27,7 @@ export function initSearch(nodes, eventBus) {
     const query = input.value.trim().toLowerCase();
     if (query.length < 2) {
       results.classList.remove('visible');
+      input.setAttribute('aria-expanded', 'false');
       return;
     }
 
@@ -34,14 +35,16 @@ export function initSearch(nodes, eventBus) {
     activeIndex = -1;
 
     if (matches.length === 0) {
-      results.classList.remove('visible');
+      results.innerHTML = `<li class="search-no-results">No hazards found</li>`;
+      results.classList.add('visible');
+      input.setAttribute('aria-expanded', 'true');
       return;
     }
 
     results.innerHTML = matches.map((node, i) => {
       const typeDef = getTypeDef(node.typeName);
       return `
-        <li data-index="${i}" data-node-id="${node.id}">
+        <li data-index="${i}" data-node-id="${node.id}" role="option" id="search-result-${i}">
           <span class="result-swatch" style="background:${typeDef.color}"></span>
           <span class="result-label">${highlight(node.label, query)}</span>
           <span class="result-type">${typeDef.short}</span>
@@ -50,12 +53,14 @@ export function initSearch(nodes, eventBus) {
     }).join('');
 
     results.classList.add('visible');
+    input.setAttribute('aria-expanded', 'true');
 
     // Attach click handlers
     results.querySelectorAll('li').forEach(li => {
       li.addEventListener('click', () => {
         selectResult(li.dataset.nodeId);
         results.classList.remove('visible');
+        input.setAttribute('aria-expanded', 'false');
         input.value = '';
       });
     });
@@ -79,10 +84,12 @@ export function initSearch(nodes, eventBus) {
       if (activeIndex >= 0 && items[activeIndex]) {
         selectResult(items[activeIndex].dataset.nodeId);
         results.classList.remove('visible');
+        input.setAttribute('aria-expanded', 'false');
         input.value = '';
       }
     } else if (e.key === 'Escape') {
       results.classList.remove('visible');
+      input.setAttribute('aria-expanded', 'false');
     }
   });
 
@@ -90,6 +97,7 @@ export function initSearch(nodes, eventBus) {
   document.addEventListener('click', (e) => {
     if (!e.target.closest('#search-container')) {
       results.classList.remove('visible');
+      input.setAttribute('aria-expanded', 'false');
     }
   });
 }
@@ -128,10 +136,18 @@ function selectResult(nodeId) {
 
 /** Highlight the active dropdown item during keyboard navigation. */
 function updateActive(items, index) {
-  items.forEach(li => li.classList.remove('active'));
+  const input = document.getElementById('search-input');
+  items.forEach(li => {
+    li.classList.remove('active');
+    li.removeAttribute('aria-selected');
+  });
   if (items[index]) {
     items[index].classList.add('active');
+    items[index].setAttribute('aria-selected', 'true');
     items[index].scrollIntoView({ block: 'nearest' });
+    input.setAttribute('aria-activedescendant', items[index].id);
+  } else {
+    input.removeAttribute('aria-activedescendant');
   }
 }
 

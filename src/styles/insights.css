@@ -12,7 +12,7 @@
   background: rgba(var(--bg-surface-rgb), 0.95);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-lg);
   backdrop-filter: blur(8px);
   /* Default position: bottom-center of viewport */
   bottom: 48px;

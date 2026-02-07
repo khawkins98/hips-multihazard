@@ -185,7 +185,7 @@ function buildCausesHtml(data) {
         ${data.causes.map(id => {
           const target = nodeDataMap.get(id);
           const label = target?.label || id;
-          return `<li><span class="causal-link causes" data-node-id="${esc(id)}">${esc(label)}</span></li>`;
+          return `<li><button class="causal-link causes" data-node-id="${esc(id)}">${esc(label)}</button></li>`;
         }).join('')}
       </ul>
     </div>
@@ -218,7 +218,7 @@ function buildCausedByHtml(data) {
         ${(data.causedBy || []).map(id => {
           const source = nodeDataMap.get(id);
           const label = source?.label || id;
-          return `<li><span class="causal-link caused-by" data-node-id="${esc(id)}">${esc(label)}</span></li>`;
+          return `<li><button class="causal-link caused-by" data-node-id="${esc(id)}">${esc(label)}</button></li>`;
         }).join('')}
         ${inferredIds
           .sort((a, b) => {
@@ -229,7 +229,7 @@ function buildCausedByHtml(data) {
           .map(id => {
             const source = nodeDataMap.get(id);
             const label = source?.label || id;
-            return `<li><span class="causal-link caused-by inferred" data-node-id="${esc(id)}">${esc(label)}</span> <span class="causal-inferred">(inferred)</span></li>`;
+            return `<li><button class="causal-link caused-by inferred" data-node-id="${esc(id)}">${esc(label)}</button> <span class="causal-inferred">(inferred)</span></li>`;
           }).join('')}
       </ul>
     </div>
@@ -299,7 +299,7 @@ function showDetail(nodeId) {
   const typeDef = getTypeDef(data.typeName);
   const typeSlug = (data.typeName || '').toLowerCase().replace(/\s+/g, '-');
 
-  content.innerHTML = [
+  content.innerHTML = `<button class="detail-close" aria-label="Close detail panel">&times;</button>` + [
     buildHeaderHtml(data, typeDef, typeSlug, currentHops),
     buildAltLabelsHtml(data),
     buildCentralityHtml(data),
@@ -325,6 +325,11 @@ function showDetail(nodeId) {
       btn.classList.add('active');
       bus.emit('khop:change', { nodeId: data.id, hops });
     });
+  });
+
+  // Close button
+  content.querySelector('.detail-close')?.addEventListener('click', () => {
+    bus.emit('node:deselected');
   });
 }
 

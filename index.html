@@ -20,8 +20,8 @@
     </div>
     <div class="header-right">
       <div id="search-container">
-        <input type="text" id="search-input" placeholder="Search hazards..." autocomplete="off" />
-        <ul id="search-results"></ul>
+        <input type="text" id="search-input" placeholder="Search hazards..." autocomplete="off" role="combobox" aria-expanded="false" aria-controls="search-results" aria-autocomplete="list" aria-label="Search hazards" />
+        <ul id="search-results" role="listbox" aria-label="Search results"></ul>
       </div>
       <button id="btn-about" title="About">About</button>
     </div>
@@ -106,7 +106,7 @@
       </div>
     </div>
 
-    <aside id="detail-panel">
+    <aside id="detail-panel" aria-label="Hazard details">
       <div id="detail-placeholder">
         <p>Click a hazard node to view details</p>
       </div>
@@ -123,10 +123,10 @@
     <span id="snapshot-info"></span>
   </footer>
 
-  <div id="about-overlay" class="overlay hidden">
+  <div id="about-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="about-heading">
     <div class="overlay-content">
-      <button class="overlay-close">&times;</button>
-      <h2>About</h2>
+      <button class="overlay-close" aria-label="Close">&times;</button>
+      <h2 id="about-heading">About</h2>
       <div id="about-body"></div>
     </div>
   </div>

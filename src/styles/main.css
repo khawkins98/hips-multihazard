@@ -6,7 +6,7 @@
   --border: #2e3244;
   --text: #e1e4ed;
   --text-muted: #8b90a0;
-  --text-dim: #5a5f73;
+  --text-dim: #6e7389;
   --accent: #5b9cf5;
   --accent-hover: #7ab4ff;
   --danger: #ef5350;
@@ -16,6 +16,12 @@
   --detail-width: 340px;
   --radius: 6px;
   --radius-sm: 4px;
+  --radius-lg: 8px;
+  --radius-pill: 10px;
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
 
   /* Semantic graph colors (mirrored in src/graph/constants.js STYLE_COLORS) */
   --edge-color: #999;
@@ -44,6 +50,11 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+*:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 body {
@@ -146,7 +157,7 @@ a:hover {
   font-size: 12px;
   line-height: 1.5;
   color: var(--text);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  box-shadow: var(--shadow-md);
   max-width: 260px;
   white-space: nowrap;
 }
@@ -302,8 +313,13 @@ button {
 }
 
 button:hover {
+  background: #2e3347;
+  border-color: var(--text-muted);
+}
+
+button:active {
   background: var(--border);
-  border-color: var(--text-dim);
+  transform: scale(0.98);
 }
 
 /* Hyper-route floating labels */
@@ -397,4 +413,12 @@ input[type="checkbox"],
 input[type="radio"] {
   accent-color: var(--accent);
   margin-right: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -274,6 +274,10 @@ export function initGraph(elements, bus) {
   bus.on('edges:toggle', (data) => handleEdgesToggle(cy, bus, data));
   bus.on('filter:types', (data) => handleFilterTypes(cy, data));
   bus.on('grouping:change', (data) => handleGroupingChange(cy, bus, data));
+  bus.on('node:deselected', () => {
+    cy.elements().removeClass(HIGHLIGHT_CLASSES);
+    cy.elements().unselect();
+  });
 
   return cy;
 }

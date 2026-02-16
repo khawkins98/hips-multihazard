@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-HIPs Multi-Hazard Explorer — an interactive graph visualization of the UNDRR Hazard Information Profiles (HIPs) taxonomy. Displays 281 hazard nodes with ~1,648 causal edges across 8 hazard types and 38 clusters, using Cytoscape.js for rendering.
+HIPs Multi-Hazard Explorer — an interactive visualization of the UNDRR Hazard Information Profiles (HIPs) taxonomy. Displays 281 hazard nodes with ~1,648 causal edges across 8 hazard types and 38 clusters, using D3.js for rendering (radial hierarchical edge bundling + cascade tree explorer).
 
 ## Commands
 
@@ -19,17 +19,21 @@ No test framework is configured.
 
 ## Architecture
 
-**Stack:** Vite + vanilla JS (ES modules), Cytoscape.js with fcose/dagre layouts, plain CSS with custom properties.
+**Stack:** Vite + vanilla JS (ES modules), D3.js (d3-hierarchy, d3-shape, d3-selection, d3-zoom, d3-transition, d3-interpolate) for visualization, Cytoscape.js headless-only for graph algorithms (centrality, pathfinding), plain CSS with custom properties.
 
-**Data pipeline:** Build-time snapshot (`scripts/snapshot.js`) fetches PreventionWeb's JSON-LD API, normalizes it, and writes `public/data/hips.json` (~1.1 MB). At runtime, `src/data/fetch-hips.js` loads the snapshot (falling back to live API), and `src/data/transform.js` converts it to Cytoscape elements with three grouping modes (type/cluster/flat).
+**Data pipeline:** Build-time snapshot (`scripts/snapshot.js`) fetches PreventionWeb's JSON-LD API, normalizes it, and writes `public/data/hips.json` (~1.1 MB). At runtime, `src/data/fetch-hips.js` loads the snapshot (falling back to live API). Two transform paths exist: `src/data/transform.js` for headless Cytoscape elements (algorithms only), and `src/views/edge-bundling/transform.js` for the D3 hierarchy tree.
 
-**Module communication:** A simple event bus (pub/sub) created in `src/main.js` decouples modules. Key events: `filter:types`, `grouping:request`, `grouping:change`, `edges:toggle`, `layout:change`, `node:selected`, `node:deselected`, `node:focus`, `khop:change`, `centrality:computed`, `pathfinder:mode`, `pathfinder:select`, `pathfinder:result`, `pathfinder:clear`, `flow:highlight`, `insight:highlight`.
+**Views:** Two coordinated views managed by `src/views/view-manager.js`:
+- **"The Web"** (default) — Radial hierarchical edge bundling. Hazards on circumference grouped by Type → Cluster. 1,648 edges as bundled Bezier curves. Canvas (edges) + SVG (nodes/arcs/labels).
+- **"Cascade"** — Bidirectional causal chain tree. Selected hazard at center; causes expand left, effects expand right. Progressive disclosure with expand/collapse.
+
+**Module communication:** A simple event bus (pub/sub) created in `src/main.js` decouples modules. Key events: `filter:types`, `edges:toggle`, `node:selected`, `node:deselected`, `node:focus`, `khop:change`, `centrality:computed`, `pathfinder:mode`, `pathfinder:select`, `pathfinder:result`, `pathfinder:clear`, `flow:highlight`, `insight:highlight`, `cascade:open`.
 
 **Source layout:**
-- `src/data/` — data fetching, JSON-LD→Cytoscape transform, hazard type definitions (colors/icons), centrality computation, flow matrix computation, network insights
-- `src/graph/` — Cytoscape init, interaction handlers (click/hover/k-hop highlight), layout configs, stylesheet
-- `src/ui/` — sidebar (filters/grouping/layout/centrality ranking), detail panel (with k-hop controls and centrality metrics), typeahead search, toolbar (zoom/about), legend, path finder, flow matrix panel, insights panel
-- `src/styles/` — CSS organized by component (main, sidebar, detail-panel, toolbar, insights, path-finder, flow-matrix)
+- `src/data/` — data fetching, JSON-LD→Cytoscape transform (headless), hazard type definitions (colors/icons), centrality computation, flow matrix computation, network insights
+- `src/views/` — view manager, edge-bundling view (transform, layout, canvas-edges, svg-overlay, interactions), cascade view (data, render, orchestrator)
+- `src/ui/` — sidebar (view switcher/filters/tension/centrality ranking), detail panel (with k-hop controls and centrality metrics), typeahead search, toolbar (zoom/about), legend, path finder, flow matrix panel, insights panel
+- `src/styles/` — CSS organized by component (main, sidebar, detail-panel, toolbar, insights, path-finder, flow-matrix, edge-bundling, cascade)
 
 ## Key Data Format Notes
 
@@ -39,7 +43,7 @@ The source data is JSON-LD using SKOS/XKOS vocabularies. Values are not plain st
 - References are `{@id: "..."}` objects — use `refId()` helper
 - Fields can be single values or arrays — use `toArray()` helper
 
-These helpers are defined in `scripts/snapshot.js`.
+These helpers are defined in `src/utils/jsonld.js` (shared by both `scripts/snapshot.js` and runtime code).
 
 ## Deployment
 
@@ -47,8 +51,9 @@ GitHub Pages via `.github/workflows/deploy.yml`. Triggers on push to `main`. Bas
 
 ## Conventions
 
-- All modules export init functions (e.g., `initGraph`, `initSidebar`) called from `src/main.js`
-- XSS prevention: use the `esc()` function (replicated in each UI module) when inserting user-facing data into HTML
-- Cytoscape batch updates (`cy.batch()`) for bulk element changes to avoid layout thrashing
+- All modules export init/create functions (e.g., `createViewManager`, `initSidebar`) called from `src/main.js`
+- View modules export `create*View()` factories that return an API object with `activate`, `deactivate`, `destroy`, and view-specific methods
+- XSS prevention: use the `esc()` function from `src/utils/dom.js` when inserting user-facing data into HTML
+- Edge bundling uses Canvas (edges) + SVG (nodes/labels) layered rendering for performance
 - Dark theme using CSS custom properties (`--bg`, `--text`, `--accent`, etc.) defined in `src/styles/main.css`
 - Floating panels (flow matrix, insights) use a draggable title bar pattern with `setupDrag()`, CSS `resize: both`, and `.hidden` class toggle — not modal overlays

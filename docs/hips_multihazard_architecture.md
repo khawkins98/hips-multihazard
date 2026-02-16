@@ -321,14 +321,25 @@ Edges are derived from the `xkos:causes` declarations. Each `causes` entry on a 
 
 ---
 
-## Relationship to the Cytoscape graph model
+## Relationship to the visualization
 
-The `src/data/transform.js` module converts the snapshot into Cytoscape elements. It supports three grouping modes:
+### D3 hierarchy tree (edge bundling view)
 
-| Mode | Compound nodes created | Hazard node `parent` |
-|---|---|---|
-| `type` | 8 type containers | `type:{typeId}` |
-| `cluster` | 8 types + 38 clusters (nested) | `cluster:{clusterId}` |
-| `flat` | None | `undefined` |
+The `src/views/edge-bundling/transform.js` module converts the snapshot into a 4-level tree for `d3.hierarchy()`:
 
-During transformation, edges are annotated with a `declared` boolean: `true` if the target node's `causedBy` array includes the source node (both sides attest the link), `false` otherwise (only the source's `causes` attests it).
+```
+root
+  └─ Type (8 children, ordered for visual adjacency)
+       └─ Cluster (sorted alphabetically)
+            └─ Hazard (sorted by connectionCount descending)
+```
+
+`d3.cluster()` positions hazard leaves on the circumference of a circle. Type and cluster groupings control the angular placement. Edges are rendered separately as bundled Bezier curves through the hierarchy using `d3.lineRadial()` with `curveBundle.beta(tension)`.
+
+### Cytoscape headless (algorithms only)
+
+The `src/data/transform.js` module still converts the snapshot into Cytoscape elements for a headless instance used only for graph algorithms (centrality metrics, shortest path). During this transformation, edges are annotated with a `declared` boolean: `true` if the target node's `causedBy` array includes the source node (both sides attest the link), `false` otherwise (only the source's `causes` attests it).
+
+### Cascade tree (cascade view)
+
+The `src/views/cascade/cascade-data.js` module builds adjacency indices (`effectsIndex`, `triggersIndex`) from the snapshot for fast bidirectional tree construction. Trees are built lazily on demand when a user selects a hazard, expanding one level at a time.

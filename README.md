@@ -2,30 +2,33 @@
 
 **[Live demo](https://khawkins98.github.io/hips-multihazard/)**
 
-A network graph of the [UNDRR/ISC Hazard Information Profiles (HIPs)](https://www.preventionweb.net/drr-glossary/hips): 281 hazards, 8 types, 38 clusters, and ~1,648 causal relationships.
+An interactive visualization of the [UNDRR/ISC Hazard Information Profiles (HIPs)](https://www.preventionweb.net/drr-glossary/hips): 281 hazards, 8 types, 38 clusters, and ~1,648 causal relationships.
 
 ## Overview
 
-The HIPs describe hazards used in disaster risk reduction. This tool plots the causal links between them (`xkos:causes` / `xkos:causedBy`), so you can see how one hazard triggers or amplifies another.
+The HIPs describe hazards used in disaster risk reduction. This tool visualizes the causal links between them (`xkos:causes` / `xkos:causedBy`), so you can see how one hazard triggers or amplifies another across domains.
 
-Features:
-- Force-directed, hierarchical, and concentric layouts
-- Group hazards by type, cluster, or flat
-- **Corridor view**: aggregates 1,648 individual causal edges into weighted "hyperspace routes" between the 8 hazard type groups — thicker, brighter lines indicate heavier causal traffic. Inspired by sci-fi hyperspace route maps and the flow-map tradition in thematic cartography.
-- Click a node to highlight its neighborhood and see the full profile
+### Two views
+
+- **The Web** (default): Radial hierarchical edge bundling. 281 hazards arranged on the circumference of a circle, grouped by Type and Cluster. 1,648 causal edges rendered as bundled Bezier curves through the hierarchy center. An adjustable tension slider transitions between tight bundling (macro type-to-type flow patterns) and loose bundling (individual connections). Hover a hazard to highlight its connections; hover a type arc to see all edges for that type.
+- **Cascade**: Bidirectional causal chain explorer. Select any hazard and see its causal cascade unfold as an expandable tree — "what causes it" expands leftward, "what it causes" expands rightward. Each level is expandable on click. Handles cycles with ghost/reference nodes.
+
+### Common features
+
 - Search by name, alternate label, or identifier
 - Filter by hazard type, toggle all causal links on/off
-- **Declared-only mode**: filter edges to show only mutually acknowledged relationships, with the layout recomputing to reflect the reduced edge set
+- **Declared-only mode**: filter edges to show only mutually acknowledged relationships
+- Click a node to view its full hazard profile in the detail panel
 
 ### Research tools
 
-- **K-hop neighborhood expansion**: after selecting a node, expand the visible neighborhood to 2, 3, or 4 hops to trace cascading causal chains
+- **K-hop neighborhood expansion**: after selecting a node, expand the highlighted neighborhood to 2, 3, or 4 hops to trace cascading causal chains
 - **Centrality metrics**: betweenness, PageRank, and closeness centrality computed for all nodes, shown in the detail panel with ranks and as a sortable top-20 sidebar list
 - **Shortest path finder**: select two nodes to find and highlight the shortest directed causal path between them using Dijkstra's algorithm
 - **Type-to-type flow matrix**: an 8x8 heatmap showing directed causal edge counts between hazard types; click a cell to highlight those edges on the graph. Exportable as CSV.
-- **Insights panel**: nine network-statistics cards (average degree, most connected node, cross-type edge ratio, reciprocation rate, etc.) that highlight the relevant subgraph on click
+- **Insights panel**: network-statistics cards (average degree, most connected node, cross-type edge ratio, reciprocation rate, etc.) that highlight the relevant subgraph on click
 
-The flow matrix and insights panels are draggable, resizable floating tool palettes that stay open while you interact with the graph.
+The flow matrix and insights panels are draggable, resizable floating tool palettes that stay open while you interact with the visualization.
 
 ## Setup
 
@@ -69,15 +72,10 @@ For example, TL0405 (Road Traffic Accident) has 24 declared connections (7 cause
 
 ### Visualization and knowledge organization
 
-- Franz, M., Lopes, C.T., Huck, G., Dong, Y., Sumer, O. & Bader, G.D. (2016). "Cytoscape.js: a graph theory library for visualisation and analysis." *Bioinformatics*, 32(2), 309–311.
+- Holten, D. (2006). "Hierarchical Edge Bundling: Visualization of Adjacency Relations in Hierarchical Data." *IEEE Transactions on Visualization and Computer Graphics*, 12(5), 741–748. (The edge bundling technique used in "The Web" view.)
+- Bostock, M., Ogievetsky, V. & Heer, J. (2011). "D3: Data-Driven Documents." *IEEE Transactions on Visualization and Computer Graphics*, 17(12), 2301–2309.
 - Miles, A. & Bechhofer, S. (2009). "SKOS Simple Knowledge Organization System Reference." *W3C Recommendation*. https://www.w3.org/TR/skos-reference/
 - Cotton, F., Kunz, M., Dottori, F. & Stocker, D. (2023). "Multi-hazard and systemic framework for risk-informed decision making." *EU Horizon Technical Report.*
-
-### Corridor view inspirations
-
-- Tobler, W.R. (1987). "Experiments in migration mapping by computer." *The American Cartographer*, 14(2), 155–163. (Origin of flow maps as a cartographic technique for showing aggregate movement between regions.)
-- Phan, D., Xiao, L., Yeh, R., Hanrahan, P. & Winograd, T. (2005). "Flow Map Layout." *IEEE Symposium on Information Visualization (InfoVis)*. (Automated layout algorithms for edge-bundled flow maps.)
-- Holten, D. (2006). "Hierarchical Edge Bundling: Visualization of Adjacency Relations in Hierarchical Data." *IEEE Transactions on Visualization and Computer Graphics*, 12(5), 741–748. (Visual technique for aggregating edges between groups in network diagrams.)
 
 ## Attribution
 

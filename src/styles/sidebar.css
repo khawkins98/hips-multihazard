@@ -53,20 +53,6 @@
   font-size: 11px;
 }
 
-/* Grouping radios */
-#grouping-controls label {
-  display: flex;
-  align-items: center;
-  padding: 3px 6px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 12px;
-}
-
-#grouping-controls label:hover {
-  background: var(--bg-elevated);
-}
-
 /* Edge toggle */
 #edge-toggle-label {
   display: flex;
@@ -163,32 +149,6 @@
 .info-tip:hover .info-tip-content,
 .info-tip:focus-within .info-tip-content {
   display: block;
-}
-
-/* Layout controls */
-#layout-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.layout-btn {
-  text-align: left;
-  padding: 5px 8px;
-  font-size: 12px;
-  background: transparent;
-  border: 1px solid transparent;
-}
-
-.layout-btn:hover {
-  background: var(--bg-elevated);
-  border-color: var(--text-muted);
-}
-
-.layout-btn.active {
-  background: var(--bg-elevated);
-  border-color: var(--accent);
-  color: var(--accent);
 }
 
 /* Centrality ranking */
@@ -311,6 +271,17 @@
   height: 12px;
   border-radius: 50%;
   border: 1.5px solid #fff;
+}
+
+/* Inferred edge legend line */
+.legend-edge-inferred {
+  background: transparent;
+  border-bottom: 2px dashed #999;
+  height: 0;
+}
+
+.legend-edge-inferred::after {
+  display: none;
 }
 
 /* Disabled section (corridor mode) */

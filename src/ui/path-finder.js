@@ -2,12 +2,13 @@
  * @module ui/path-finder
  * Shortest Path Finder: select two nodes to find and highlight
  * the shortest directed causal path between them.
+ * Uses headless Cytoscape for Dijkstra computation,
+ * emits highlight events for the active view to render.
  * @emits pathfinder:mode
  * @emits pathfinder:clear
  * @emits pathfinder:result
  * @listens pathfinder:select
  * @listens pathfinder:clear
- * @listens grouping:change
  */
 
 let pathfinderActive = false;
@@ -17,7 +18,7 @@ let target = null;
 /**
  * Initialize the path finder module.
  * @param {object} bus - Event bus
- * @param {Function} getCy - Function returning the Cytoscape instance
+ * @param {Function} getCy - Function returning the headless Cytoscape instance
  */
 export function initPathFinder(bus, getCy) {
   const section = document.getElementById('pathfinder-section');
@@ -60,20 +61,8 @@ export function initPathFinder(bus, getCy) {
   });
 
   bus.on('pathfinder:clear', () => {
-    const cy = getCy();
-    if (cy) {
-      cy.elements().removeClass('path-step path-highlighted');
-    }
-  });
-
-  // Clear path state on grouping change
-  bus.on('grouping:change', () => {
-    if (pathfinderActive) {
-      pathfinderActive = false;
-      toggleBtn.classList.remove('active');
-      bus.emit('pathfinder:mode', { active: false });
-    }
-    resetState();
+    // Clear highlight via insight:highlight clear
+    bus.emit('insight:highlight', { clear: true });
   });
 
   function resetState() {
@@ -94,7 +83,7 @@ export function initPathFinder(bus, getCy) {
       return;
     }
 
-    const elements = cy.elements(':visible').filter('[!isCompound]');
+    const elements = cy.elements().filter('[!isCompound]');
     const dijkstra = elements.dijkstra({
       root: sourceNode,
       directed: true,
@@ -111,23 +100,16 @@ export function initPathFinder(bus, getCy) {
     const path = dijkstra.pathTo(targetNode);
     status.textContent = `Path: ${Math.round(dist)} hop${dist !== 1 ? 's' : ''}`;
 
-    // Clear previous highlights and apply path classes
-    cy.elements().removeClass('dimmed highlighted highlight-hidden path-step path-highlighted');
-
-    cy.batch(() => {
-      cy.nodes().addClass('dimmed');
-      cy.edges().addClass('highlight-hidden');
-
-      path.forEach(ele => {
-        if (ele.isNode()) {
-          ele.removeClass('dimmed').addClass('path-step');
-          ele.ancestors().removeClass('dimmed');
-        } else {
-          ele.removeClass('highlight-hidden').addClass('path-highlighted');
-        }
-      });
+    // Collect path node IDs for highlighting in the active view
+    const pathNodeIds = [];
+    path.forEach(ele => {
+      if (ele.isNode()) {
+        pathNodeIds.push(ele.id());
+      }
     });
 
+    // Highlight path nodes in the active view
+    bus.emit('insight:highlight', { nodeIds: pathNodeIds });
     bus.emit('pathfinder:result', { path, distance: dist });
   }
 }

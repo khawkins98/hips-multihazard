@@ -1,0 +1,30 @@
+/* Cascade Explorer View */
+
+.cascade-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+}
+
+.cascade-link {
+  transition: opacity 0.2s;
+}
+
+.cascade-node {
+  transition: opacity 0.2s;
+}
+
+.cascade-node.ghost rect {
+  opacity: 0.4;
+}
+
+.cascade-node.ghost text {
+  opacity: 0.6;
+}
+
+.cascade-root rect {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}

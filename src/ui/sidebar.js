@@ -1,16 +1,18 @@
 /**
  * @module ui/sidebar
- * Sidebar: type filter checkboxes, grouping controls, edge toggle, layout buttons, centrality ranking.
+ * Sidebar: view switcher, type filter checkboxes, bundling tension, edge toggle, centrality ranking.
  * @emits filter:types
- * @emits grouping:request
  * @emits edges:toggle
- * @emits layout:change
  * @emits node:focus
+ * @emits cascade:open
  * @listens centrality:computed
  */
 import { HAZARD_TYPES, getTypeDef } from '../data/hazard-types.js';
 import { esc } from '../utils/dom.js';
 import { TOP_N_CENTRALITY } from './constants.js';
+
+/** @type {object|null} View manager reference, set during init */
+let viewManagerRef = null;
 
 /**
  * Initialize sidebar controls.
@@ -19,19 +21,26 @@ import { TOP_N_CENTRALITY } from './constants.js';
  */
 export function initSidebar(data, bus) {
   initTypeFilters(data, bus);
-  initGroupingControls(bus);
   initEdgeToggle(bus);
-  initLayoutControls(bus);
+  initTensionSlider(bus);
+  initViewSwitcher(bus);
+}
+
+/**
+ * Connect sidebar to the view manager for tension slider and view switching.
+ * Called from main.js after viewManager is created.
+ * @param {object} viewManager
+ */
+export function connectViewManager(viewManager) {
+  viewManagerRef = viewManager;
 }
 
 /**
  * Build type-filter checkboxes from the data, emitting 'filter:types' on change.
- * Each checkbox shows the hazard type color swatch, short name, and node count.
  */
 function initTypeFilters(data, bus) {
   const container = document.getElementById('type-filters');
 
-  // Count hazards per type
   const typeCounts = new Map();
   for (const node of data.nodes) {
     const name = node.typeName || 'Unknown';
@@ -40,7 +49,6 @@ function initTypeFilters(data, bus) {
 
   const hiddenTypes = new Set();
 
-  // Create a checkbox for each type
   for (const [typeName, typeDef] of Object.entries(HAZARD_TYPES)) {
     const count = typeCounts.get(typeName) || 0;
     if (count === 0) continue;
@@ -74,25 +82,6 @@ function initTypeFilters(data, bus) {
   }
 }
 
-/** Bind grouping radio buttons to emit 'grouping:request' events. */
-function initGroupingControls(bus) {
-  const radios = document.querySelectorAll('#grouping-controls input[name="grouping"]');
-  const layoutBtns = document.querySelectorAll('.layout-btn');
-
-  for (const radio of radios) {
-    radio.addEventListener('change', () => {
-      if (radio.checked) {
-        // Reset active layout button to Hyperspace on grouping change
-        layoutBtns.forEach(btn => {
-          btn.classList.toggle('active', btn.dataset.layout === 'hyperspace');
-        });
-
-        bus.emit('grouping:request', { mode: radio.value });
-      }
-    });
-  }
-}
-
 /** Bind the causal-link toggle checkboxes to emit 'edges:toggle' events. */
 function initEdgeToggle(bus) {
   const toggle = document.getElementById('edge-toggle');
@@ -121,6 +110,46 @@ function initEdgeToggle(bus) {
   });
 }
 
+/** Initialize the bundling tension slider. */
+function initTensionSlider(bus) {
+  const slider = document.getElementById('tension-slider');
+  const valueDisplay = document.getElementById('tension-value');
+  if (!slider) return;
+
+  slider.addEventListener('input', () => {
+    const val = parseFloat(slider.value);
+    valueDisplay.textContent = val.toFixed(2);
+    if (viewManagerRef) {
+      const view = viewManagerRef.getActiveView();
+      if (view?.setTension) view.setTension(val);
+    }
+  });
+}
+
+/** Initialize view switcher buttons. */
+function initViewSwitcher(bus) {
+  const buttons = document.querySelectorAll('.view-btn');
+  const tensionSection = document.getElementById('tension-section');
+
+  for (const btn of buttons) {
+    btn.addEventListener('click', () => {
+      const viewName = btn.dataset.view;
+      buttons.forEach(b => b.classList.toggle('active', b === btn));
+
+      // Show/hide view-specific controls
+      if (tensionSection) {
+        tensionSection.style.display = viewName === 'web' ? '' : 'none';
+      }
+
+      if (viewManagerRef) {
+        viewManagerRef.switchView(viewName);
+      } else {
+        bus.emit('cascade:open', { rootId: null });
+      }
+    });
+  }
+}
+
 /**
  * Initialize centrality ranking section in the sidebar.
  * @param {object} bus - Event bus
@@ -133,7 +162,6 @@ export function initCentralityRanking(bus) {
   const listContainer = section.querySelector('.centrality-list');
   const select = section.querySelector('#centrality-metric-select');
 
-  // Collapsible toggle
   let collapsed = true;
   listContainer.classList.add('hidden');
   header.style.cursor = 'pointer';
@@ -154,13 +182,11 @@ export function initCentralityRanking(bus) {
 
   select.addEventListener('change', renderList);
 
-  /** Render the centrality ranking list based on the selected metric. */
   function renderList() {
     if (!currentMetrics) return;
     const metricKey = select.value;
     const rankKey = metricKey + 'Rank';
 
-    // Sort by rank, take top 20
     const sorted = [...currentMetrics.entries()]
       .sort((a, b) => a[1][rankKey] - b[1][rankKey])
       .slice(0, TOP_N_CENTRALITY);
@@ -181,23 +207,10 @@ export function initCentralityRanking(bus) {
       </li>`;
     }).join('');
 
-    // Click to focus node
     ul.querySelectorAll('.centrality-item').forEach(li => {
       li.addEventListener('click', () => {
         bus.emit('node:focus', { id: li.dataset.nodeId });
       });
-    });
-  }
-}
-
-/** Bind layout buttons (fcose/dagre/concentric) to emit 'layout:change' events. */
-function initLayoutControls(bus) {
-  const buttons = document.querySelectorAll('.layout-btn');
-  for (const btn of buttons) {
-    btn.addEventListener('click', () => {
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      bus.emit('layout:change', { name: btn.dataset.layout });
     });
   }
 }

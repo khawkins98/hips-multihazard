@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="/src/styles/insights.css" />
   <link rel="stylesheet" href="/src/styles/path-finder.css" />
   <link rel="stylesheet" href="/src/styles/flow-matrix.css" />
+  <link rel="stylesheet" href="/src/styles/edge-bundling.css" />
+  <link rel="stylesheet" href="/src/styles/cascade.css" />
 </head>
 <body>
   <header id="app-header">
@@ -29,17 +31,27 @@
 
   <main id="app-main">
     <aside id="sidebar">
+      <section id="view-section">
+        <h2>View</h2>
+        <div class="view-switcher">
+          <button class="view-btn active" data-view="web">The Web</button>
+          <button class="view-btn" data-view="cascade">Cascade</button>
+        </div>
+      </section>
+
       <section id="filter-section">
         <h2>Hazard Types</h2>
         <div id="type-filters"></div>
       </section>
 
-      <section id="grouping-section">
-        <h2>Grouping</h2>
-        <div id="grouping-controls">
-          <label><input type="radio" name="grouping" value="type" checked /> By Type</label>
-          <label><input type="radio" name="grouping" value="cluster" /> By Cluster</label>
-          <label><input type="radio" name="grouping" value="flat" /> Flat</label>
+      <section id="tension-section">
+        <h2>Edge Bundling</h2>
+        <div class="tension-control">
+          <label>
+            <span>Tension</span>
+            <span id="tension-value">0.85</span>
+          </label>
+          <input type="range" id="tension-slider" min="0" max="1" step="0.01" value="0.85" />
         </div>
       </section>
 
@@ -76,16 +88,6 @@
         </div>
       </section>
 
-      <section id="layout-section">
-        <h2>Layout</h2>
-        <div id="layout-controls">
-          <button class="layout-btn active" data-layout="hyperspace">Hyperspace</button>
-          <button class="layout-btn" data-layout="fcose">Force-directed</button>
-          <button class="layout-btn" data-layout="dagre">Hierarchical</button>
-          <button class="layout-btn" data-layout="concentric">Concentric</button>
-        </div>
-      </section>
-
       <section id="legend-section">
         <h2>Legend</h2>
         <div id="legend"></div>
@@ -93,7 +95,6 @@
     </aside>
 
     <div id="graph-container">
-      <div id="cy"></div>
       <div id="toolbar">
         <button id="btn-zoom-in" title="Zoom in">+</button>
         <button id="btn-zoom-out" title="Zoom out">&minus;</button>

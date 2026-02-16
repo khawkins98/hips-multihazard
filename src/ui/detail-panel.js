@@ -99,6 +99,7 @@ function buildHeaderHtml(data, typeDef, typeSlug, currentHops) {
           `<button class="khop-btn${currentHops === h ? ' active' : ''}" data-hops="${h}">${h}-hop</button>`
         ).join('')}
       </div>
+      <button class="cascade-btn" data-node-id="${esc(data.id)}">Explore Cascade</button>
     </div>
   `;
 }
@@ -330,6 +331,11 @@ function showDetail(nodeId) {
   // Close button
   content.querySelector('.detail-close')?.addEventListener('click', () => {
     bus.emit('node:deselected');
+  });
+
+  // Explore Cascade button
+  content.querySelector('.cascade-btn')?.addEventListener('click', () => {
+    bus.emit('cascade:open', { rootId: data.id });
   });
 }
 

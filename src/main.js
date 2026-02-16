@@ -1,17 +1,14 @@
 /**
  * @module main
- * Main entry point — orchestrates data loading, graph init, and UI wiring.
+ * Main entry point — orchestrates data loading, view init, and UI wiring.
  * Creates the event bus and connects all modules.
- * @emits grouping:change
- * @emits centrality:computed
- * @listens grouping:request
- * @listens node:focus
+ * Uses the view manager (D3 edge bundling / cascade) instead of Cytoscape for visualization.
+ * Keeps Cytoscape headless for graph algorithms (centrality, pathfinding).
  */
 import { fetchHipsData } from './data/fetch-hips.js';
 import { transformToElements } from './data/transform.js';
-import { initGraph, getCy } from './graph/graph.js';
-import { focusNode } from './graph/interactions.js';
-import { initSidebar, initCentralityRanking } from './ui/sidebar.js';
+import { createViewManager } from './views/view-manager.js';
+import { initSidebar, initCentralityRanking, connectViewManager } from './ui/sidebar.js';
 import { initDetailPanel, setCentralityData } from './ui/detail-panel.js';
 import { initSearch } from './ui/search.js';
 import { initToolbar } from './ui/toolbar.js';
@@ -23,10 +20,9 @@ import { initPathFinder } from './ui/path-finder.js';
 import { initFlowMatrix } from './ui/flow-matrix.js';
 import { createBus } from './utils/bus.js';
 
-/**
- * Bootstrap the application: fetch data, build graph, wire up UI modules.
- * Shows a loading overlay during init and displays errors on failure.
- */
+// Headless Cytoscape for graph algorithms
+import cytoscape from 'cytoscape';
+
 async function main() {
   const bus = createBus();
   const loading = document.getElementById('loading-overlay');
@@ -35,69 +31,64 @@ async function main() {
     // 1. Fetch data
     const data = await fetchHipsData();
 
-    // 2. Transform to Cytoscape elements
-    let currentGrouping = 'type';
-    const { elements, nodeDataMap } = transformToElements(data, currentGrouping);
+    // 2. Build Cytoscape elements for headless graph algorithms
+    const { elements, nodeDataMap } = transformToElements(data, 'type');
 
-    // 3. Initialize UI components (before graph, so listeners are ready)
+    // 3. Create headless Cytoscape instance for algorithms (centrality, pathfinding)
+    const headlessCy = cytoscape({
+      headless: true,
+      elements,
+    });
+
+    // 4. Initialize UI components (before views, so listeners are ready)
     initSidebar(data, bus);
     initDetailPanel(nodeDataMap, data.edges, bus);
     initSearch(data.nodes, bus);
-    initToolbar(getCy);
     initLegend(data.nodes, bus);
 
-    // 4. Compute network insights
+    // 5. Compute network insights
     const insights = computeInsights(data);
 
-    // 5. Initialize graph
-    const cy = initGraph(elements, bus);
+    // 6. Create view manager (replaces old initGraph)
+    const container = document.getElementById('graph-container');
+    const viewManager = createViewManager(container, data, bus);
 
-    // 6. Initialize insights drawer
+    // 6b. Connect sidebar to view manager for tension/view switching
+    connectViewManager(viewManager);
+
+    // 7. Initialize toolbar with view manager zoom delegates
+    initToolbar(viewManager);
+
+    // 8. Initialize insights drawer
     initInsights(insights, data, bus);
 
-    // 6b. Initialize path finder
-    initPathFinder(bus, getCy);
+    // 9. Initialize path finder with headless Cytoscape
+    initPathFinder(bus, () => headlessCy);
 
-    // 6d. Initialize centrality ranking section
+    // 10. Initialize centrality ranking section
     initCentralityRanking(bus);
 
-    // 6e. Initialize flow matrix
+    // 11. Initialize flow matrix
     initFlowMatrix(data, bus);
 
-    // 6f. Compute centrality metrics
-    const centralityMetrics = computeCentrality(cy);
+    // 12. Compute centrality metrics (headless)
+    const centralityMetrics = computeCentrality(headlessCy);
     setCentralityData(centralityMetrics);
     bus.emit('centrality:computed', { metrics: centralityMetrics, nodeDataMap });
 
-    // 7. Handle grouping changes (requires full re-transform)
-    bus.on('grouping:request', ({ mode }) => {
-      currentGrouping = mode;
-      const result = transformToElements(data, mode);
-      bus.emit('grouping:change', {
-        mode,
-        elements: result.elements,
-      });
-      // Recompute centrality after layout finishes
-      cy.one('layoutstop', () => {
-        const newMetrics = computeCentrality(cy);
-        setCentralityData(newMetrics);
-        bus.emit('centrality:computed', { metrics: newMetrics, nodeDataMap });
-      });
-    });
-
-    // 8. Handle node focus (from detail panel causal links or search)
+    // 13. Handle node focus (from detail panel causal links or search)
     bus.on('node:focus', ({ id }) => {
-      focusNode(cy, id, bus);
+      viewManager.getActiveView()?.focusNode?.(id);
     });
 
-    // 9. Update footer with snapshot info
+    // 14. Update footer with snapshot info
     const info = document.getElementById('snapshot-info');
     if (data.meta) {
       const date = data.meta.fetchedAt ? new Date(data.meta.fetchedAt).toLocaleDateString() : 'unknown';
       info.textContent = `${data.meta.nodeCount || data.nodes.length} hazards · Snapshot: ${date}`;
     }
 
-    // 10. Hide loading overlay
+    // 15. Hide loading overlay
     loading.classList.add('fade-out');
     setTimeout(() => loading.remove(), 400);
 

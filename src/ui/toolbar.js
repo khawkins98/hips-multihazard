@@ -1,38 +1,30 @@
 /**
  * @module ui/toolbar
  * Toolbar: zoom controls (in/out/fit/reset), about overlay.
+ * Now delegates to the view manager instead of Cytoscape directly.
  */
-import { ZOOM_FACTOR, FIT_PADDING } from '../graph/constants.js';
 import { getEl } from '../utils/dom.js';
 
 /**
  * Initialize toolbar controls.
- * @param {function} getCy - Returns current Cytoscape instance
+ * @param {object} viewManager - View manager with zoom/fit/reset methods
  */
-export function initToolbar(getCy) {
+export function initToolbar(viewManager) {
   // Zoom controls
   getEl('btn-zoom-in')?.addEventListener('click', () => {
-    const cy = getCy();
-    if (cy) cy.zoom({ level: cy.zoom() * ZOOM_FACTOR, renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } });
+    viewManager.zoomIn();
   });
 
   getEl('btn-zoom-out')?.addEventListener('click', () => {
-    const cy = getCy();
-    if (cy) cy.zoom({ level: cy.zoom() / ZOOM_FACTOR, renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } });
+    viewManager.zoomOut();
   });
 
   getEl('btn-fit')?.addEventListener('click', () => {
-    const cy = getCy();
-    if (cy) cy.fit(undefined, FIT_PADDING);
+    viewManager.fit();
   });
 
   getEl('btn-reset')?.addEventListener('click', () => {
-    const cy = getCy();
-    if (cy) {
-      cy.elements().removeClass('dimmed highlighted');
-      cy.elements().unselect();
-      cy.fit(undefined, FIT_PADDING);
-    }
+    viewManager.reset();
   });
 
   // About overlay
@@ -71,19 +63,19 @@ function populateAbout() {
   if (!body) return;
   body.innerHTML = `
     <h3>About this project</h3>
-    <p>A network graph of the <strong>Hazard Information Profiles (HIPs)</strong> from
+    <p>A network visualization of the <strong>Hazard Information Profiles (HIPs)</strong> from
     UNDRR and the International Science Council. Shows 281 hazards across 8 types
     and the causal links between them.</p>
 
     <h3>How to use</h3>
     <ul>
+      <li><strong>The Web</strong> view shows all hazards on a radial ring with bundled causal edges. Adjust the tension slider to see macro patterns (tight) or individual connections (loose).</li>
+      <li><strong>Cascade</strong> view shows a bidirectional causal chain tree for any selected hazard.</li>
       <li>Click a node to see its profile and causal connections</li>
       <li>Search by hazard name, alternate label, or identifier</li>
       <li>Filter by hazard type using the sidebar checkboxes</li>
-      <li>Toggle causal links to show or hide all edges</li>
-      <li>Switch between force-directed, hierarchical, and concentric layouts</li>
-      <li>Group hazards by type, cluster, or flat</li>
-      <li>Click linked hazards in the detail panel to jump to them</li>
+      <li>Toggle causal links to show or hide edges</li>
+      <li>Use the Insights and Flow Matrix panels for aggregate analysis</li>
     </ul>
 
     <h3>Data</h3>

@@ -97,25 +97,6 @@ export function renderCascade(svg, effectsTree, triggersTree, rootNode, callback
       callbacks.onNodeClick(rootNode.id);
     });
 
-  // Add direction labels
-  g.append('text')
-    .attr('x', LEVEL_SPACING * 0.4)
-    .attr('y', -NODE_SPACING * 2)
-    .attr('text-anchor', 'start')
-    .attr('fill', 'var(--text-dim)')
-    .attr('font-size', '11px')
-    .attr('font-style', 'italic')
-    .text('Effects (what it causes) →');
-
-  g.append('text')
-    .attr('x', -LEVEL_SPACING * 0.4)
-    .attr('y', -NODE_SPACING * 2)
-    .attr('text-anchor', 'end')
-    .attr('fill', 'var(--text-dim)')
-    .attr('font-size', '11px')
-    .attr('font-style', 'italic')
-    .text('← Triggers (what causes it)');
-
   return {
     zoomIn() {
       svgSel.transition().duration(200).call(zoomBehavior.scaleBy, 1.3);

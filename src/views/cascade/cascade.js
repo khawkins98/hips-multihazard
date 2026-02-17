@@ -46,6 +46,7 @@ function getSuggestions(data, effectsIndex, triggersIndex) {
 export function createCascadeView(container, data, bus) {
   let svg = null;
   let renderer = null;
+  let directionLabels = null;
   let currentRootId = null;
   let currentDepth = DEFAULT_DEPTH;
   let active = false;
@@ -65,6 +66,14 @@ export function createCascadeView(container, data, bus) {
     svg.classList.add('cascade-svg');
     container.appendChild(svg);
 
+    // Direction labels — fixed overlay at top of pane
+    directionLabels = document.createElement('div');
+    directionLabels.className = 'cascade-direction-labels hidden';
+    directionLabels.innerHTML =
+      '<span class="cascade-dir-label cascade-dir-triggers">\u2190 Triggers</span>' +
+      '<span class="cascade-dir-label cascade-dir-effects">Effects \u2192</span>';
+    container.appendChild(directionLabels);
+
     const rect = container.getBoundingClientRect();
     svg.setAttribute('width', rect.width);
     svg.setAttribute('height', rect.height);
@@ -78,6 +87,7 @@ export function createCascadeView(container, data, bus) {
 
   function showPlaceholder() {
     if (!svg) return;
+    if (directionLabels) directionLabels.classList.add('hidden');
     const rect = container.getBoundingClientRect();
     const cx = rect.width / 2;
     const cy = rect.height / 2;
@@ -131,6 +141,7 @@ export function createCascadeView(container, data, bus) {
     currentRootId = rootId;
     const rootNode = nodeById.get(rootId);
     if (!rootNode) return;
+    if (directionLabels) directionLabels.classList.remove('hidden');
 
     // Build trees for both directions using current depth
     const visited = new Set();
@@ -180,6 +191,8 @@ export function createCascadeView(container, data, bus) {
       renderer = null;
       if (svg) svg.remove();
       svg = null;
+      if (directionLabels) directionLabels.remove();
+      directionLabels = null;
     },
 
     destroy() {

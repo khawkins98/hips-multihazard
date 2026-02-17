@@ -29,6 +29,27 @@
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
+/* Fixed direction labels at top of cascade pane */
+.cascade-direction-labels {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.cascade-dir-label {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  opacity: 0.7;
+}
+
 /* Empty-state suggestion chips */
 .cascade-suggestions {
   display: flex;

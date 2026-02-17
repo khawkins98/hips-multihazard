@@ -129,7 +129,7 @@
   pointer-events: none;
 }
 
-/* About button active state (in footer) */
+/* About button active state */
 #btn-about.active {
   background: var(--accent);
   border-color: var(--accent);

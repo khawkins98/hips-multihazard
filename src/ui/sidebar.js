@@ -47,7 +47,14 @@ function initTypeFilters(data, bus) {
     typeCounts.set(name, (typeCounts.get(name) || 0) + 1);
   }
 
-  const hiddenTypes = new Set();
+  /** Derive the set of hidden type names from checkbox DOM state. */
+  function getHiddenFromCheckboxes() {
+    const hidden = new Set();
+    container.querySelectorAll('input[type="checkbox"]').forEach(c => {
+      if (!c.checked && c.dataset.typeName) hidden.add(c.dataset.typeName);
+    });
+    return hidden;
+  }
 
   for (const [typeName, typeDef] of Object.entries(HAZARD_TYPES)) {
     const count = typeCounts.get(typeName) || 0;
@@ -57,6 +64,7 @@ function initTypeFilters(data, bus) {
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.checked = true;
+    cb.dataset.typeName = typeName;
 
     const swatch = document.createElement('span');
     swatch.className = 'type-swatch';
@@ -72,12 +80,7 @@ function initTypeFilters(data, bus) {
     container.appendChild(label);
 
     cb.addEventListener('change', () => {
-      if (cb.checked) {
-        hiddenTypes.delete(typeName);
-      } else {
-        hiddenTypes.add(typeName);
-      }
-      bus.emit('filter:types', { hiddenTypes: new Set(hiddenTypes) });
+      bus.emit('filter:types', { hiddenTypes: getHiddenFromCheckboxes() });
     });
   }
 }
@@ -123,6 +126,7 @@ function initTensionSlider(bus) {
       const view = viewManagerRef.getActiveView();
       if (view?.setTension) view.setTension(val);
     }
+    bus.emit('url:tension', { tension: val });
   });
 }
 
@@ -146,6 +150,8 @@ function initViewSwitcher(bus) {
       } else {
         bus.emit('cascade:open', { rootId: null });
       }
+
+      bus.emit('url:view', { view: viewName });
     });
   }
 }

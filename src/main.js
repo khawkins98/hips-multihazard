@@ -19,6 +19,7 @@ import { computeCentrality } from './data/centrality.js';
 import { initPathFinder } from './ui/path-finder.js';
 import { initFlowMatrix } from './ui/flow-matrix.js';
 import { createBus } from './utils/bus.js';
+import { parseUrl, createUrlSync, applyUrlState } from './utils/url-state.js';
 
 // Headless Cytoscape for graph algorithms
 import cytoscape from 'cytoscape';
@@ -30,6 +31,9 @@ async function main() {
   try {
     // 1. Fetch data
     const data = await fetchHipsData();
+
+    // 1b. Parse URL state (before any UI init)
+    const urlState = parseUrl(data.nodes);
 
     // 2. Build Cytoscape elements for headless graph algorithms
     const { elements, nodeDataMap } = transformToElements(data, 'type');
@@ -71,24 +75,52 @@ async function main() {
     // 11. Initialize flow matrix
     initFlowMatrix(data, bus);
 
-    // 12. Compute centrality metrics (headless)
+    // 12. Start URL sync (seeded with parsed URL state so params aren't lost)
+    const urlSync = createUrlSync(bus, data.nodes, urlState);
+
+    // 13. Compute centrality metrics (headless)
     const centralityMetrics = computeCentrality(headlessCy);
     setCentralityData(centralityMetrics);
     bus.emit('centrality:computed', { metrics: centralityMetrics, nodeDataMap });
 
-    // 13. Handle node focus (from detail panel causal links or search)
+    // 14. Handle node focus (from detail panel causal links or search)
     bus.on('node:focus', ({ id }) => {
       viewManager.getActiveView()?.focusNode?.(id);
     });
 
-    // 14. Update footer with snapshot info
+    // 15. Update footer with snapshot info
     const info = document.getElementById('snapshot-info');
     if (data.meta) {
       const date = data.meta.fetchedAt ? new Date(data.meta.fetchedAt).toLocaleDateString() : 'unknown';
       info.textContent = `${data.meta.nodeCount || data.nodes.length} hazards · Snapshot: ${date}`;
     }
 
-    // 15. Hide loading overlay
+    // 16. Apply URL state (restore shared link state)
+    applyUrlState(urlState, bus, viewManager);
+
+    // 17. Wire header action buttons
+    const copyBtn = document.getElementById('btn-copy-link');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+          setTimeout(() => {
+            copyBtn.textContent = 'Copy Link';
+            copyBtn.classList.remove('copied');
+          }, 1500);
+        });
+      });
+    }
+
+    const resetBtn = document.getElementById('btn-reset-app');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        window.location.href = window.location.pathname;
+      });
+    }
+
+    // 18. Hide loading overlay
     loading.classList.add('fade-out');
     setTimeout(() => loading.remove(), 400);
 

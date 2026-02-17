@@ -6,6 +6,35 @@
 import { buildAdjacencyIndex, buildCascadeTree } from './cascade-data.js';
 import { renderCascade } from './cascade-render.js';
 import { DEFAULT_DEPTH, MAX_DEPTH } from './constants.js';
+import { getTypeDef } from '../../data/hazard-types.js';
+import { esc } from '../../utils/dom.js';
+
+/**
+ * Pick suggested hazards for the empty state: most connected, diverse across types.
+ */
+function getSuggestions(data, effectsIndex, triggersIndex) {
+  const scored = data.nodes.map(n => ({
+    id: n.id,
+    label: n.label,
+    typeName: n.typeName,
+    color: getTypeDef(n.typeName).color,
+    effects: (effectsIndex.get(n.id) || []).length,
+    triggers: (triggersIndex.get(n.id) || []).length,
+    total: (effectsIndex.get(n.id) || []).length + (triggersIndex.get(n.id) || []).length,
+  }));
+  scored.sort((a, b) => b.total - a.total);
+
+  // Pick at most one per type, up to 8 total
+  const seen = new Set();
+  const picks = [];
+  for (const s of scored) {
+    if (seen.has(s.typeName)) continue;
+    seen.add(s.typeName);
+    picks.push(s);
+    if (picks.length >= 8) break;
+  }
+  return picks;
+}
 
 /**
  * Create and manage the cascade view.
@@ -18,10 +47,14 @@ export function createCascadeView(container, data, bus) {
   let svg = null;
   let renderer = null;
   let currentRootId = null;
+  let currentDepth = DEFAULT_DEPTH;
   let active = false;
 
   // Build adjacency indices once
   const { effectsIndex, triggersIndex, nodeById } = buildAdjacencyIndex(data);
+
+  // Pre-compute suggested hazards: most connected, one per type
+  const suggestions = getSuggestions(data, effectsIndex, triggersIndex);
 
   /**
    * Initialize the view with an optional root node.
@@ -46,12 +79,52 @@ export function createCascadeView(container, data, bus) {
   function showPlaceholder() {
     if (!svg) return;
     const rect = container.getBoundingClientRect();
-    svg.innerHTML = `
-      <text x="${rect.width / 2}" y="${rect.height / 2}"
-            text-anchor="middle" fill="var(--text-muted)" font-size="14px">
-        Select a hazard to explore its causal cascade
-      </text>
-    `;
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+
+    svg.innerHTML = '';
+
+    // Prompt text
+    const prompt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    prompt.setAttribute('x', cx);
+    prompt.setAttribute('y', cy - 80);
+    prompt.setAttribute('text-anchor', 'middle');
+    prompt.setAttribute('fill', 'var(--text-muted)');
+    prompt.setAttribute('font-size', '14px');
+    prompt.textContent = 'Select a hazard to explore its causal cascade';
+    svg.appendChild(prompt);
+
+    // "Or try one of these:" label
+    const subLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    subLabel.setAttribute('x', cx);
+    subLabel.setAttribute('y', cy - 50);
+    subLabel.setAttribute('text-anchor', 'middle');
+    subLabel.setAttribute('fill', 'var(--text-muted)');
+    subLabel.setAttribute('font-size', '12px');
+    subLabel.textContent = 'Or try one of these:';
+    svg.appendChild(subLabel);
+
+    // Render suggestion chips using foreignObject for easier HTML layout
+    const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+    fo.setAttribute('x', cx - 240);
+    fo.setAttribute('y', cy - 40);
+    fo.setAttribute('width', 480);
+    fo.setAttribute('height', 200);
+    svg.appendChild(fo);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'cascade-suggestions';
+    fo.appendChild(wrap);
+
+    for (const s of suggestions) {
+      const chip = document.createElement('button');
+      chip.className = 'cascade-suggestion-chip';
+      chip.style.setProperty('--chip-color', s.color);
+      chip.innerHTML = `<span class="chip-dot" style="background:${esc(s.color)}"></span>${esc(s.label)}`;
+      chip.title = `${s.typeName} — ${s.effects} effects, ${s.triggers} triggers`;
+      chip.addEventListener('click', () => renderTree(s.id));
+      wrap.appendChild(chip);
+    }
   }
 
   function renderTree(rootId) {
@@ -59,23 +132,23 @@ export function createCascadeView(container, data, bus) {
     const rootNode = nodeById.get(rootId);
     if (!rootNode) return;
 
-    // Build trees for both directions
+    // Build trees for both directions using current depth
     const visited = new Set();
-    const effectsTree = buildCascadeTree(effectsIndex, nodeById, rootId, DEFAULT_DEPTH, new Set(visited));
-    const triggersTree = buildCascadeTree(triggersIndex, nodeById, rootId, DEFAULT_DEPTH, new Set(visited));
+    const effectsTree = buildCascadeTree(effectsIndex, nodeById, rootId, currentDepth, new Set(visited));
+    const triggersTree = buildCascadeTree(triggersIndex, nodeById, rootId, currentDepth, new Set(visited));
 
     renderer = renderCascade(svg, effectsTree, triggersTree, rootNode, {
       onNodeClick(id) {
+        renderTree(id);
         bus.emit('node:selected', { id });
       },
       onGhostClick(id) {
-        // Re-root the tree on the ghost node
         renderTree(id);
+        bus.emit('node:selected', { id });
       },
       onExpand(id, direction) {
-        // Re-render with expanded node
-        // For simplicity, re-root on the clicked node
         renderTree(id);
+        bus.emit('node:selected', { id });
       },
     });
   }
@@ -114,7 +187,14 @@ export function createCascadeView(container, data, bus) {
     },
 
     focusNode(nodeId) {
-      if (active) renderTree(nodeId);
+      if (!active) return;
+      renderTree(nodeId);
+      bus.emit('node:selected', { id: nodeId });
+    },
+
+    setDepth(depth) {
+      currentDepth = Math.max(1, Math.min(depth, MAX_DEPTH));
+      if (active && currentRootId) renderTree(currentRootId);
     },
 
     filterTypes() { /* Not applicable to cascade */ },

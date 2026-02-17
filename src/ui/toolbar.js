@@ -1,9 +1,9 @@
 /**
  * @module ui/toolbar
- * Toolbar: zoom controls (in/out/fit/reset), about overlay.
+ * Toolbar: zoom controls (in/out/fit/reset), about floating panel.
  * Now delegates to the view manager instead of Cytoscape directly.
  */
-import { getEl } from '../utils/dom.js';
+import { getEl, setupDrag } from '../utils/dom.js';
 
 /**
  * Initialize toolbar controls.
@@ -27,37 +27,41 @@ export function initToolbar(viewManager) {
     viewManager.reset();
   });
 
-  // About overlay
+  // About floating panel
   const aboutBtn = getEl('btn-about');
-  const overlay = getEl('about-overlay');
-  if (!overlay) return;
-  const closeBtn = overlay.querySelector('.overlay-close');
+  const panel = getEl('about-panel');
+  if (!panel) return;
 
   populateAbout();
 
+  // Toggle button
   aboutBtn?.addEventListener('click', () => {
-    overlay.classList.remove('hidden');
-    closeBtn?.focus();
+    const isHidden = panel.classList.toggle('hidden');
+    aboutBtn.classList.toggle('active', !isHidden);
   });
-  closeBtn?.addEventListener('click', () => {
-    overlay.classList.add('hidden');
-    aboutBtn?.focus();
+
+  // Close button inside panel
+  panel.querySelector('#about-panel-close')?.addEventListener('click', () => {
+    panel.classList.add('hidden');
+    aboutBtn?.classList.remove('active');
   });
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) {
-      overlay.classList.add('hidden');
-      aboutBtn?.focus();
-    }
-  });
+
+  // ESC to close
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !overlay.classList.contains('hidden')) {
-      overlay.classList.add('hidden');
-      aboutBtn?.focus();
+    if (e.key === 'Escape' && !panel.classList.contains('hidden')) {
+      panel.classList.add('hidden');
+      aboutBtn?.classList.remove('active');
     }
   });
+
+  // Drag behavior on title bar
+  setupDrag(panel, panel.querySelector('#about-titlebar'));
+
+  // Open on page load
+  aboutBtn?.classList.add('active');
 }
 
-/** Fill the about overlay with usage instructions, data provenance, and attribution. */
+/** Fill the about panel with usage instructions, data provenance, and attribution. */
 function populateAbout() {
   const body = getEl('about-body');
   if (!body) return;

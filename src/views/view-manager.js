@@ -79,18 +79,8 @@ export function createViewManager(container, data, bus) {
   });
 
   bus.on('node:focus', ({ id }) => {
-    // If in cascade view, switch back to web and focus
-    if (activeViewName === 'cascade') {
-      switchView('web');
-      // Small delay to let web view activate
-      setTimeout(() => {
-        const view = getActiveView();
-        if (view?.focusNode) view.focusNode(id);
-      }, 100);
-    } else {
-      const view = getActiveView();
-      if (view?.focusNode) view.focusNode(id);
-    }
+    const view = getActiveView();
+    if (view?.focusNode) view.focusNode(id);
   });
 
   bus.on('node:deselected', () => {
@@ -133,8 +123,15 @@ export function createViewManager(container, data, bus) {
   });
 
   bus.on('khop:change', ({ nodeId, hops }) => {
-    // For edge bundling, we can highlight k-hop neighborhood
     const view = getActiveView();
+
+    // In cascade mode, hops controls tree expansion depth
+    if (view?.setDepth) {
+      view.setDepth(hops);
+      return;
+    }
+
+    // In edge bundling, highlight k-hop neighborhood
     if (!view?.getAdjacency) return;
 
     const adj = view.getAdjacency();

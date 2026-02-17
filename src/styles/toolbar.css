@@ -129,10 +129,9 @@
   pointer-events: none;
 }
 
-/* About button */
-#btn-about {
-  background: transparent;
-  border: 1px solid var(--border);
-  padding: 4px 12px;
-  font-size: 12px;
+/* About button active state (in footer) */
+#btn-about.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
 }

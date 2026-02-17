@@ -28,3 +28,39 @@
 .cascade-root rect {
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
+
+/* Empty-state suggestion chips */
+.cascade-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.cascade-suggestion-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid color-mix(in srgb, var(--chip-color) 50%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--chip-color) 12%, transparent);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.cascade-suggestion-chip:hover {
+  background: color-mix(in srgb, var(--chip-color) 28%, transparent);
+  border-color: var(--chip-color);
+}
+
+.cascade-suggestion-chip .chip-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}

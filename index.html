@@ -25,7 +25,6 @@
         <input type="text" id="search-input" placeholder="Search hazards..." autocomplete="off" role="combobox" aria-expanded="false" aria-controls="search-results" aria-autocomplete="list" aria-label="Search hazards" />
         <ul id="search-results" role="listbox" aria-label="Search results"></ul>
       </div>
-      <button id="btn-about" title="About">About</button>
     </div>
   </header>
 
@@ -118,18 +117,19 @@
   <footer id="app-footer">
     <span>Data from <a href="https://www.preventionweb.net/drr-glossary/hips" target="_blank" rel="noopener">UNDRR/ISC Hazard Information Profiles</a> &middot; CC BY 4.0</span>
     <span id="footer-actions">
+      <button id="btn-about">About</button>
       <button id="btn-insights">Insights</button>
       <button id="btn-flow-matrix">Flow Matrix</button>
     </span>
     <span id="snapshot-info"></span>
   </footer>
 
-  <div id="about-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="about-heading">
-    <div class="overlay-content">
-      <button class="overlay-close" aria-label="Close">&times;</button>
-      <h2 id="about-heading">About</h2>
-      <div id="about-body"></div>
+  <div id="about-panel" class="about-panel">
+    <div class="about-panel-titlebar" id="about-titlebar">
+      <span class="about-panel-title">About</span>
+      <button class="about-panel-close" id="about-panel-close">&times;</button>
     </div>
+    <div class="about-panel-body" id="about-body"></div>
   </div>
 
   <div id="flow-panel" class="flow-panel hidden">

@@ -125,20 +125,20 @@ function buildCentralityHtml(data) {
   if (!metrics) return '';
   return `
     <div class="centrality-section">
-      <h3>Centrality</h3>
+      <h3>Centrality <span class="info-tip" aria-label="What is centrality?">?<span class="info-tip-content">Centrality measures how important a hazard is within the network based on its connections and position.</span></span></h3>
       <div class="centrality-metrics">
         <div class="centrality-metric">
-          <span class="centrality-name">Betweenness</span>
+          <span class="centrality-name">Betweenness <span class="info-tip" aria-label="What is betweenness?">?<span class="info-tip-content">How often this hazard lies on the shortest path between other hazards. High values indicate key bridges in causal chains.</span></span></span>
           <span class="centrality-value">${metrics.betweenness.toFixed(4)}</span>
           <span class="centrality-rank">#${metrics.betweennessRank}</span>
         </div>
         <div class="centrality-metric">
-          <span class="centrality-name">PageRank</span>
+          <span class="centrality-name">PageRank <span class="info-tip" aria-label="What is PageRank?">?<span class="info-tip-content">Importance based on being caused by other important hazards. High values mean many significant triggers.</span></span></span>
           <span class="centrality-value">${metrics.pageRank.toFixed(4)}</span>
           <span class="centrality-rank">#${metrics.pageRankRank}</span>
         </div>
         <div class="centrality-metric">
-          <span class="centrality-name">Closeness</span>
+          <span class="centrality-name">Closeness <span class="info-tip" aria-label="What is closeness?">?<span class="info-tip-content">How quickly this hazard can reach all others via causal links. High values mean fewer steps to the rest of the network.</span></span></span>
           <span class="centrality-value">${metrics.closeness.toFixed(4)}</span>
           <span class="centrality-rank">#${metrics.closenessRank}</span>
         </div>

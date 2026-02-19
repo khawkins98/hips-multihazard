@@ -10,6 +10,7 @@ import { str, refId, toArray } from '../src/utils/jsonld.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const API_URL = 'https://www.preventionweb.net/api/terms/hips';
 const OUT_PATH = join(__dirname, '..', 'public', 'data', 'hips.json');
+const BUNDLED_PATH = join(__dirname, '..', 'src', 'data', 'hips-snapshot.json');
 
 /**
  * Fetch the full HIPs JSON-LD dataset from PreventionWeb, extract hazard nodes
@@ -128,11 +129,14 @@ async function fetchAndTransform() {
     edges,
   };
 
+  const json = JSON.stringify(snapshot);
   mkdirSync(dirname(OUT_PATH), { recursive: true });
-  writeFileSync(OUT_PATH, JSON.stringify(snapshot));
+  writeFileSync(OUT_PATH, json);
+  writeFileSync(BUNDLED_PATH, json);
 
-  const sizeMB = (Buffer.byteLength(JSON.stringify(snapshot)) / 1024 / 1024).toFixed(2);
+  const sizeMB = (Buffer.byteLength(json) / 1024 / 1024).toFixed(2);
   console.log(`Written ${OUT_PATH}`);
+  console.log(`Written ${BUNDLED_PATH} (bundled fallback)`);
   console.log(`  ${nodes.length} nodes, ${edges.length} edges`);
   console.log(`  ${typeMap.size} types, ${clusterMap.size} clusters`);
   console.log(`  ${sizeMB} MB`);

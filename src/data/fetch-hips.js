@@ -117,14 +117,26 @@ export async function fetchHipsData() {
       console.warn('Live API failed:', e.message);
     }
 
-    // 4. Last resort: return snapshot if we got one (even though validation failed above),
-    //    or try reading a stale cache entry
+    // 4. Return snapshot if we partially loaded one
     if (snapshotData) return snapshotData;
 
+    // 5. Try stale localStorage cache
     const stale = readStaleCache();
     if (stale) {
       console.warn('Using stale cached data as fallback');
       return stale;
+    }
+
+    // 6. Last resort: load the hard-coded bundled snapshot (baked into JS at build time)
+    try {
+      const bundled = await import('./hips-snapshot.json');
+      const data = bundled.default || bundled;
+      validateData(data);
+      console.warn('Using bundled snapshot as last-resort fallback');
+      writeCache(data);
+      return data;
+    } catch (importErr) {
+      console.warn('Bundled snapshot also failed:', importErr.message);
     }
 
     throw new Error(

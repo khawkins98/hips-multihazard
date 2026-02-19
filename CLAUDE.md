@@ -22,7 +22,7 @@ No test framework or linter is configured.
 
 **Stack:** Vite + vanilla JS (ES modules), D3.js (d3-hierarchy, d3-shape, d3-selection, d3-zoom, d3-transition, d3-interpolate) for visualization, Cytoscape.js headless-only for graph algorithms (centrality, pathfinding), plain CSS with custom properties.
 
-**Data pipeline:** Build-time snapshot (`scripts/snapshot.js`) fetches PreventionWeb's JSON-LD API, normalizes it, and writes `public/data/hips.json` (~1.1 MB). At runtime, `src/data/fetch-hips.js` loads the snapshot (falling back to live API). Two transform paths exist: `src/data/transform.js` for headless Cytoscape elements (algorithms only), and `src/views/edge-bundling/transform.js` for the D3 hierarchy tree.
+**Data pipeline:** Build-time snapshot (`scripts/snapshot.js`) fetches PreventionWeb's JSON-LD API, normalizes it, and writes both `public/data/hips.json` (~1.1 MB, fetched at runtime) and `src/data/hips-snapshot.json` (bundled into JS as a last-resort fallback). At runtime, `src/data/fetch-hips.js` loads data with a multi-tier fallback: localStorage cache (1-hour TTL) → fetchable snapshot → live API → stale cache → bundled snapshot. This handles CORS/firewall blocks gracefully. Two transform paths exist: `src/data/transform.js` for headless Cytoscape elements (algorithms only), and `src/views/edge-bundling/transform.js` for the D3 hierarchy tree.
 
 **Views:** Two coordinated views managed by `src/views/view-manager.js`:
 - **"The Web"** (default) — Radial hierarchical edge bundling. Hazards on circumference grouped by Type → Cluster. 1,648 edges as bundled Bezier curves. Canvas (edges) + SVG (nodes/arcs/labels).

@@ -41,7 +41,7 @@ npm run build      # Production build for GitHub Pages
 
 ## Data
 
-Data is fetched from the [PreventionWeb HIPs API](https://www.preventionweb.net/api/terms/hips) and stored as a build-time snapshot. The API publishes Linked Open Data using:
+Data is fetched from the [PreventionWeb HIPs API](https://www.preventionweb.net/api/terms/hips) and stored as a build-time snapshot. At runtime, data loads through a multi-tier fallback chain: localStorage cache (1-hour TTL) → static snapshot → live API → stale cache → bundled snapshot (baked into JS). This ensures the app works behind restrictive firewalls and on repeat visits without network requests. The API publishes Linked Open Data using:
 
 - **SKOS** (Simple Knowledge Organization System) for concept hierarchy
 - **XKOS** (eXtended KOS) for causal relationships

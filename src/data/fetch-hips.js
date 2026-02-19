@@ -1,12 +1,16 @@
 /**
  * @module data/fetch-hips
  * Fetches HIPs data from the local snapshot (preferred) or live API.
- * Falls back to a minimal client-side JSON-LD transform if the snapshot is unavailable.
+ * Caches data in localStorage (1-hour TTL) so repeated visits avoid re-fetching.
+ * Falls back gracefully when the live API is blocked by CORS/network rules.
  */
 import { str, refId, toArray } from '../utils/jsonld.js';
 
 const SNAPSHOT_URL = import.meta.env.BASE_URL + 'data/hips.json';
 const API_URL = 'https://www.preventionweb.net/api/terms/hips';
+const CACHE_KEY = 'hips-data';
+const CACHE_TS_KEY = 'hips-data-ts';
+const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 /**
  * Validate that data has the expected shape with nodes and edges arrays.
@@ -23,11 +27,87 @@ function validateData(data) {
 }
 
 /**
- * Load HIPs hazard data, trying the local snapshot first and falling back to the live API.
- * @returns {Promise<{meta: Object, nodes: Array, edges: Array}>} Normalized hazard dataset
+ * Try to read cached data from localStorage.
+ * @returns {object|null} Cached data if valid and fresh, null otherwise
+ */
+function readCache() {
+  try {
+    const ts = parseInt(localStorage.getItem(CACHE_TS_KEY), 10);
+    if (!ts || Date.now() - ts > CACHE_TTL) return null;
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    validateData(data);
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Write data to localStorage cache.
+ * @param {object} data - Validated data to cache
+ */
+function writeCache(data) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
+  } catch {
+    // localStorage full or unavailable — ignore
+  }
+}
+
+/**
+ * Detect whether a fetch error is likely a CORS or network block.
+ * @param {Error} err
+ * @returns {boolean}
+ */
+function isCorsOrNetworkError(err) {
+  if (err.name === 'TypeError') return true; // fetch throws TypeError on CORS/network failure
+  return false;
+}
+
+/**
+ * Load HIPs hazard data. Priority:
+ *   1. localStorage cache (if < 1 hour old)
+ *   2. Live API (freshest data, 8s timeout)
+ *   3. Static snapshot (bundled static file, always available)
+ *   4. Stale localStorage cache (any age)
+ *   5. Bundled snapshot (baked into JS at build time)
+ * @returns {Promise<{meta: Object, nodes: Array, edges: Array, _source: string}>} Normalized hazard dataset
  */
 export async function fetchHipsData() {
-  // Try snapshot first
+  // 1. Try localStorage cache (< 1 hour old)
+  const cached = readCache();
+  if (cached) {
+    console.log(`Using cached data: ${cached.nodes.length} nodes (${cached.meta?.source || 'cache'})`);
+    cached._source = 'cache';
+    return cached;
+  }
+
+  // 2. Try live API first (freshest data, with timeout)
+  try {
+    console.log('Fetching from live API...');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(API_URL, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error(`API returned ${res.status}`);
+    const raw = await res.json();
+    const result = transformRawApi(raw);
+    validateData(result);
+    writeCache(result);
+    result._source = 'api';
+    return result;
+  } catch (e) {
+    if (isCorsOrNetworkError(e)) {
+      console.warn('Live API blocked (CORS/network):', e.message);
+    } else {
+      console.warn('Live API failed:', e.message);
+    }
+  }
+
+  // 3. Fall back to static snapshot
   try {
     const res = await fetch(SNAPSHOT_URL);
     if (res.ok) {
@@ -35,23 +115,56 @@ export async function fetchHipsData() {
       if (data.nodes && data.edges) {
         validateData(data);
         console.log(`Loaded snapshot: ${data.nodes.length} nodes, ${data.edges.length} edges`);
+        writeCache(data);
+        data._source = 'snapshot';
         return data;
       }
     }
   } catch (e) {
-    console.warn('Snapshot not available, falling back to API:', e.message);
+    console.warn('Snapshot not available:', e.message);
   }
 
-  // Fall back to live API
-  console.log('Fetching from live API...');
-  const res = await fetch(API_URL);
-  if (!res.ok) throw new Error(`API returned ${res.status}`);
-  const raw = await res.json();
+  // 4. Try stale localStorage cache (any age)
+  const stale = readStaleCache();
+  if (stale) {
+    console.warn('Using stale cached data as fallback');
+    stale._source = 'stale-cache';
+    return stale;
+  }
 
-  // Do a minimal client-side transform (the snapshot.js script does this more thoroughly)
-  const result = transformRawApi(raw);
-  validateData(result);
-  return result;
+  // 5. Last resort: bundled snapshot (baked into JS at build time)
+  try {
+    const bundled = await import('./hips-snapshot.json');
+    const data = bundled.default || bundled;
+    validateData(data);
+    console.warn('Using bundled snapshot as last-resort fallback');
+    writeCache(data);
+    data._source = 'bundled';
+    return data;
+  } catch (importErr) {
+    console.warn('Bundled snapshot also failed:', importErr.message);
+  }
+
+  throw new Error(
+    'Unable to load hazard data. The data source may be blocked by your network. ' +
+    'Try refreshing or accessing from a different network.'
+  );
+}
+
+/**
+ * Read cache ignoring TTL — used as a last-resort fallback.
+ * @returns {object|null}
+ */
+function readStaleCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    validateData(data);
+    return data;
+  } catch {
+    return null;
+  }
 }
 
 /**

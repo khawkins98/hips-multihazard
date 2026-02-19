@@ -70,12 +70,14 @@ function isCorsOrNetworkError(err) {
 /**
  * Load HIPs hazard data. Priority:
  *   1. localStorage cache (if < 1 hour old)
- *   2. Local snapshot (bundled static file)
- *   3. Live API (with CORS fallback to stale cache or snapshot)
+ *   2. Live API (freshest data, 8s timeout)
+ *   3. Static snapshot (bundled static file, always available)
+ *   4. Stale localStorage cache (any age)
+ *   5. Bundled snapshot (baked into JS at build time)
  * @returns {Promise<{meta: Object, nodes: Array, edges: Array, _source: string}>} Normalized hazard dataset
  */
 export async function fetchHipsData() {
-  // 1. Try localStorage cache
+  // 1. Try localStorage cache (< 1 hour old)
   const cached = readCache();
   if (cached) {
     console.log(`Using cached data: ${cached.nodes.length} nodes (${cached.meta?.source || 'cache'})`);
@@ -83,29 +85,13 @@ export async function fetchHipsData() {
     return cached;
   }
 
-  // 2. Try snapshot (bundled static file — no CORS issues)
-  let snapshotData = null;
-  try {
-    const res = await fetch(SNAPSHOT_URL);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.nodes && data.edges) {
-        validateData(data);
-        snapshotData = data;
-        console.log(`Loaded snapshot: ${data.nodes.length} nodes, ${data.edges.length} edges`);
-        writeCache(data);
-        data._source = 'snapshot';
-        return data;
-      }
-    }
-  } catch (e) {
-    console.warn('Snapshot not available, trying live API:', e.message);
-  }
-
-  // 3. Try live API (may be blocked by CORS/firewall)
+  // 2. Try live API first (freshest data, with timeout)
   try {
     console.log('Fetching from live API...');
-    const res = await fetch(API_URL);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(API_URL, { signal: controller.signal });
+    clearTimeout(timeout);
     if (!res.ok) throw new Error(`API returned ${res.status}`);
     const raw = await res.json();
     const result = transformRawApi(raw);
@@ -119,39 +105,50 @@ export async function fetchHipsData() {
     } else {
       console.warn('Live API failed:', e.message);
     }
-
-    // 4. Return snapshot if we partially loaded one
-    if (snapshotData) {
-      snapshotData._source = 'snapshot';
-      return snapshotData;
-    }
-
-    // 5. Try stale localStorage cache
-    const stale = readStaleCache();
-    if (stale) {
-      console.warn('Using stale cached data as fallback');
-      stale._source = 'stale-cache';
-      return stale;
-    }
-
-    // 6. Last resort: load the hard-coded bundled snapshot (baked into JS at build time)
-    try {
-      const bundled = await import('./hips-snapshot.json');
-      const data = bundled.default || bundled;
-      validateData(data);
-      console.warn('Using bundled snapshot as last-resort fallback');
-      writeCache(data);
-      data._source = 'bundled';
-      return data;
-    } catch (importErr) {
-      console.warn('Bundled snapshot also failed:', importErr.message);
-    }
-
-    throw new Error(
-      'Unable to load hazard data. The data source may be blocked by your network. ' +
-      'Try refreshing or accessing from a different network.'
-    );
   }
+
+  // 3. Fall back to static snapshot
+  try {
+    const res = await fetch(SNAPSHOT_URL);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.nodes && data.edges) {
+        validateData(data);
+        console.log(`Loaded snapshot: ${data.nodes.length} nodes, ${data.edges.length} edges`);
+        writeCache(data);
+        data._source = 'snapshot';
+        return data;
+      }
+    }
+  } catch (e) {
+    console.warn('Snapshot not available:', e.message);
+  }
+
+  // 4. Try stale localStorage cache (any age)
+  const stale = readStaleCache();
+  if (stale) {
+    console.warn('Using stale cached data as fallback');
+    stale._source = 'stale-cache';
+    return stale;
+  }
+
+  // 5. Last resort: bundled snapshot (baked into JS at build time)
+  try {
+    const bundled = await import('./hips-snapshot.json');
+    const data = bundled.default || bundled;
+    validateData(data);
+    console.warn('Using bundled snapshot as last-resort fallback');
+    writeCache(data);
+    data._source = 'bundled';
+    return data;
+  } catch (importErr) {
+    console.warn('Bundled snapshot also failed:', importErr.message);
+  }
+
+  throw new Error(
+    'Unable to load hazard data. The data source may be blocked by your network. ' +
+    'Try refreshing or accessing from a different network.'
+  );
 }
 
 /**

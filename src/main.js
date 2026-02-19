@@ -79,7 +79,9 @@ async function main() {
     // 7. Update footer with snapshot info and data freshness
     const info = document.getElementById('snapshot-info');
     if (data.meta) {
-      const date = data.meta.fetchedAt ? new Date(data.meta.fetchedAt).toLocaleDateString() : 'unknown';
+      const date = data.meta.fetchedAt
+        ? new Date(data.meta.fetchedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+        : 'unknown';
       const sourceLabels = {
         cache: 'Cached', snapshot: 'Snapshot', api: 'Live API',
         'stale-cache': 'Stale cache', bundled: 'Bundled',

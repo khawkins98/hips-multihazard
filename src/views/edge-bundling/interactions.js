@@ -97,17 +97,7 @@ export function setupInteractions({
     const nodeId = d.data.name;
     hoveredNodeId = nodeId;
 
-    // Build highlight set: node + neighbors
-    const neighbors = adjacency.get(nodeId) || new Set();
-    const allIds = new Set([nodeId, ...neighbors]);
-    highlightedNodes = allIds;
-    highlightedEdgeKeys = null;
-
-    svgOverlay.highlightNodes(allIds);
-    svgOverlay.showLabelsFor(allIds);
-    redrawEdges(getTransformForCanvas());
-
-    // Show tooltip
+    // Show tooltip regardless of selection state
     const nodeData = nodeById.get(nodeId);
     if (nodeData) {
       const cc = (nodeData.causes?.length || 0) + (nodeData.causedBy?.length || 0);
@@ -119,6 +109,19 @@ export function setupInteractions({
         event
       );
     }
+
+    // Skip highlight changes when a node is already selected (click-only when active)
+    if (selectedNodeId) return;
+
+    // Build highlight set: node + neighbors
+    const neighbors = adjacency.get(nodeId) || new Set();
+    const allIds = new Set([nodeId, ...neighbors]);
+    highlightedNodes = allIds;
+    highlightedEdgeKeys = null;
+
+    svgOverlay.highlightNodes(allIds);
+    svgOverlay.showLabelsFor(allIds);
+    redrawEdges(getTransformForCanvas());
   });
 
   nodeEls.on('mousemove', function (event) {
@@ -164,6 +167,9 @@ export function setupInteractions({
   const arcEls = svgSel.selectAll('.eb-type-arc');
 
   arcEls.on('mouseenter', function (event, d) {
+    // Skip highlight changes when a node is already selected
+    if (selectedNodeId) return;
+
     const typeName = d.typeName;
     // Highlight all nodes of this type and their edges
     const typeNodeIds = new Set();

@@ -82,11 +82,19 @@ async function main() {
       const date = data.meta.fetchedAt
         ? new Date(data.meta.fetchedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
         : 'unknown';
-      const sourceLabels = {
-        cache: 'Cached', snapshot: 'Snapshot', api: 'Live API',
-        'stale-cache': 'Stale cache', bundled: 'Bundled',
-      };
-      const sourceLabel = sourceLabels[data._source] || 'Snapshot';
+      let sourceLabel;
+      if (data._source === 'cache' || data._source === 'stale-cache') {
+        const ts = parseInt(localStorage.getItem('hips-data-ts'), 10);
+        const ageMs = ts ? Date.now() - ts : 0;
+        const ageMins = Math.floor(ageMs / 60000);
+        const ageStr = ageMins < 1 ? 'just now'
+          : ageMins < 60 ? `${ageMins}m ago`
+          : `${Math.floor(ageMins / 60)}h ${ageMins % 60}m ago`;
+        sourceLabel = `Cached ${ageStr}`;
+      } else {
+        const labels = { snapshot: 'Snapshot', api: 'Live API', bundled: 'Bundled' };
+        sourceLabel = labels[data._source] || 'Snapshot';
+      }
       info.textContent = `${data.meta.nodeCount || data.nodes.length} hazards · Data: ${date} (${sourceLabel})`;
     }
 

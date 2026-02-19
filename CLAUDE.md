@@ -9,13 +9,14 @@ HIPs Multi-Hazard Explorer — an interactive visualization of the UNDRR Hazard 
 ## Commands
 
 ```bash
+npm install          # Install dependencies
 npm run dev          # Start Vite dev server (http://localhost:5173/hips-multihazard/)
 npm run build        # Production build → dist/
 npm run preview      # Preview production build locally
 npm run snapshot     # Fetch latest data from PreventionWeb API → public/data/hips.json
 ```
 
-No test framework is configured.
+No test framework or linter is configured.
 
 ## Architecture
 
@@ -27,13 +28,21 @@ No test framework is configured.
 - **"The Web"** (default) — Radial hierarchical edge bundling. Hazards on circumference grouped by Type → Cluster. 1,648 edges as bundled Bezier curves. Canvas (edges) + SVG (nodes/arcs/labels).
 - **"Cascade"** — Bidirectional causal chain tree. Selected hazard at center; causes expand left, effects expand right. Progressive disclosure with expand/collapse.
 
-**Module communication:** A simple event bus (pub/sub) created in `src/main.js` decouples modules. Key events: `filter:types`, `edges:toggle`, `node:selected`, `node:deselected`, `node:focus`, `khop:change`, `centrality:computed`, `pathfinder:mode`, `pathfinder:select`, `pathfinder:result`, `pathfinder:clear`, `flow:highlight`, `insight:highlight`, `cascade:open`.
+**Module communication:** A simple event bus (pub/sub) decouples modules. Created in `src/main.js`, passed to all init functions. Key events: `filter:types`, `edges:toggle`, `node:selected`, `node:deselected`, `node:focus`, `khop:change`, `centrality:computed`, `pathfinder:mode`, `pathfinder:select`, `pathfinder:result`, `pathfinder:clear`, `flow:highlight`, `insight:highlight`, `cascade:open`. Full event catalog with payloads is documented in `src/utils/bus.js`.
+
+**URL state:** `src/utils/url-state.js` syncs app state (view, selected node, type filters, k-hop depth, declared-only mode) to URL query parameters for shareable links. State is parsed before UI init and applied after all modules are wired up.
+
+**Initialization order** (in `src/main.js`): fetch data → parse URL → build headless Cytoscape → init UI (sidebar, detail panel, search, legend) → compute insights → create view manager → init toolbar/insights/pathfinder/centrality/flow matrix → start URL sync → compute centrality → apply URL state. The order matters: UI listeners must be registered before the view manager emits events, and URL state must be applied last.
 
 **Source layout:**
 - `src/data/` — data fetching, JSON-LD→Cytoscape transform (headless), hazard type definitions (colors/icons), centrality computation, flow matrix computation, network insights
 - `src/views/` — view manager, edge-bundling view (transform, layout, canvas-edges, svg-overlay, interactions), cascade view (data, render, orchestrator)
 - `src/ui/` — sidebar (view switcher/filters/tension/centrality ranking), detail panel (with k-hop controls and centrality metrics), typeahead search, toolbar (zoom/about), legend, path finder, flow matrix panel, insights panel
 - `src/styles/` — CSS organized by component (main, sidebar, detail-panel, toolbar, insights, path-finder, flow-matrix, edge-bundling, cascade)
+
+## Domain Concepts
+
+**Declared vs inferred edges:** The HIPs dataset stores causal links via `xkos:causes` and `xkos:causedBy` but does not enforce symmetry. A "declared" edge is reciprocated by both endpoints; an "inferred" edge is attested by only one side. The `edges:toggle` event carries a `declaredOnly` flag, and edge objects have an `isDeclared` property. This distinction affects edge counts, filtering, and several insight metrics.
 
 ## Key Data Format Notes
 

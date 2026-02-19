@@ -50,55 +50,18 @@ async function main() {
     initSearch(data.nodes, bus);
     initLegend(data.nodes, bus);
 
-    // 5. Compute network insights
+    // 5. Compute network insights & centrality
     const insights = computeInsights(data);
-
-    // 6. Create view manager (replaces old initGraph)
-    const container = document.getElementById('graph-container');
-    const viewManager = createViewManager(container, data, bus);
-
-    // 6b. Connect sidebar to view manager for tension/view switching
-    connectViewManager(viewManager);
-
-    // 7. Initialize toolbar with view manager zoom delegates
-    initToolbar(viewManager);
-
-    // 8. Initialize insights drawer
     initInsights(insights, data, bus);
-
-    // 9. Initialize path finder with headless Cytoscape
     initPathFinder(bus, () => headlessCy);
-
-    // 10. Initialize centrality ranking section
     initCentralityRanking(bus);
-
-    // 11. Initialize flow matrix
     initFlowMatrix(data, bus);
 
-    // 12. Start URL sync (seeded with parsed URL state so params aren't lost)
-    const urlSync = createUrlSync(bus, data.nodes, urlState);
-
-    // 13. Compute centrality metrics (headless)
     const centralityMetrics = computeCentrality(headlessCy);
     setCentralityData(centralityMetrics);
     bus.emit('centrality:computed', { metrics: centralityMetrics, nodeDataMap });
 
-    // 14. Handle node focus (from detail panel causal links or search)
-    bus.on('node:focus', ({ id }) => {
-      viewManager.getActiveView()?.focusNode?.(id);
-    });
-
-    // 15. Update footer with snapshot info
-    const info = document.getElementById('snapshot-info');
-    if (data.meta) {
-      const date = data.meta.fetchedAt ? new Date(data.meta.fetchedAt).toLocaleDateString() : 'unknown';
-      info.textContent = `${data.meta.nodeCount || data.nodes.length} hazards · Snapshot: ${date}`;
-    }
-
-    // 16. Apply URL state (restore shared link state)
-    applyUrlState(urlState, bus, viewManager);
-
-    // 17. Wire header action buttons
+    // 6. Wire header action buttons
     const copyBtn = document.getElementById('btn-copy-link');
     if (copyBtn) {
       copyBtn.addEventListener('click', () => {
@@ -113,16 +76,82 @@ async function main() {
       });
     }
 
-    const resetBtn = document.getElementById('btn-reset-app');
-    if (resetBtn) {
-      resetBtn.addEventListener('click', () => {
-        window.location.href = window.location.pathname;
+    // 7. Update footer with snapshot info
+    const info = document.getElementById('snapshot-info');
+    if (data.meta) {
+      const date = data.meta.fetchedAt ? new Date(data.meta.fetchedAt).toLocaleDateString() : 'unknown';
+      info.textContent = `${data.meta.nodeCount || data.nodes.length} hazards · Snapshot: ${date}`;
+    }
+
+    // 8. Decide: start screen or direct load
+    const hasUrlState = urlState.declared || urlState.view || urlState.node
+                      || urlState.hiddenTypes || urlState.hops
+                      || urlState.edges === false || urlState.tension;
+
+    if (hasUrlState) {
+      // URL params present — skip start screen, go directly to view
+      finishInit();
+    } else {
+      // No URL params — show start screen
+      loading.classList.add('fade-out');
+      setTimeout(() => loading.remove(), 400);
+
+      const startScreen = document.getElementById('start-screen');
+      startScreen.classList.remove('hidden');
+
+      startScreen.addEventListener('click', (e) => {
+        const card = e.target.closest('.start-card');
+        if (!card) return;
+        const chosenView = card.dataset.view;
+
+        startScreen.classList.add('fade-out');
+        setTimeout(() => {
+          startScreen.remove();
+          finishInit(chosenView);
+        }, 350);
       });
     }
 
-    // 18. Hide loading overlay
-    loading.classList.add('fade-out');
-    setTimeout(() => loading.remove(), 400);
+    /**
+     * Complete initialization — create view manager and apply state.
+     * @param {string} [chosenView] - 'web' or 'cascade' from start screen choice
+     */
+    function finishInit(chosenView) {
+      // Hide loading overlay (if not already hidden by start screen path)
+      if (loading.parentNode) {
+        loading.classList.add('fade-out');
+        setTimeout(() => loading.remove(), 400);
+      }
+
+      // Create view manager
+      const container = document.getElementById('graph-container');
+      const viewManager = createViewManager(container, data, bus);
+
+      // Connect sidebar to view manager for tension/view switching
+      connectViewManager(viewManager);
+
+      // Initialize toolbar with view manager zoom delegates
+      initToolbar(viewManager);
+
+      // Start URL sync
+      const urlSync = createUrlSync(bus, data.nodes, urlState);
+
+      // Handle node focus (from detail panel causal links or search)
+      bus.on('node:focus', ({ id }) => {
+        viewManager.getActiveView()?.focusNode?.(id);
+      });
+
+      if (chosenView) {
+        // User chose from start screen
+        if (chosenView === 'cascade') {
+          viewManager.switchView('cascade');
+        }
+        bus.emit('url:view', { view: chosenView });
+      } else {
+        // URL-driven — apply saved state
+        applyUrlState(urlState, bus, viewManager);
+      }
+    }
 
   } catch (err) {
     console.error('Failed to initialize:', err);

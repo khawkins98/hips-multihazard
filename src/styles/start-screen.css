@@ -1,0 +1,138 @@
+/* Start screen — view chooser overlay */
+
+#start-screen {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-loading);
+  transition: opacity 0.35s ease;
+}
+
+#start-screen.hidden {
+  display: none !important;
+}
+
+#start-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#start-screen {
+  overflow-y: auto;
+}
+
+.start-content {
+  text-align: left;
+  max-width: 520px;
+  padding: 24px;
+}
+
+.start-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+
+.start-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+}
+
+.start-cards {
+  display: flex;
+  gap: 20px;
+}
+
+.start-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  padding: 28px 20px 24px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.start-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px rgba(91, 156, 245, 0.15);
+  background: var(--bg-elevated);
+}
+
+.start-card:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+.start-card:active {
+  transform: scale(0.97);
+}
+
+.start-icon {
+  width: 80px;
+  height: 80px;
+}
+
+.start-card-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.start-card-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* About section on start screen */
+.start-about {
+  margin-top: 32px;
+  text-align: left;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 16px 20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.start-about h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 14px 0 6px;
+}
+
+.start-about h3:first-child {
+  margin-top: 0;
+}
+
+.start-about p,
+.start-about li {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.start-about ul {
+  padding-left: 18px;
+  margin: 4px 0;
+}
+
+.start-about a {
+  color: var(--accent);
+}
+
+.start-about a:hover {
+  color: var(--accent-hover);
+}

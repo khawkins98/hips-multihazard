@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="/src/styles/flow-matrix.css" />
   <link rel="stylesheet" href="/src/styles/edge-bundling.css" />
   <link rel="stylesheet" href="/src/styles/cascade.css" />
+  <link rel="stylesheet" href="/src/styles/start-screen.css" />
 </head>
 <body>
   <header id="app-header">
@@ -26,11 +27,10 @@
         <ul id="search-results" role="listbox" aria-label="Search results"></ul>
       </div>
       <div id="header-actions">
-        <button id="btn-about">About</button>
+        <button id="btn-about">Home</button>
         <button id="btn-insights">Insights</button>
         <button id="btn-flow-matrix">Flow Matrix</button>
         <button id="btn-copy-link">Copy Link</button>
-        <button id="btn-reset-app">Reset</button>
       </div>
     </div>
   </header>
@@ -111,6 +111,76 @@
         <div class="spinner"></div>
         <p>Loading 281 hazards...</p>
       </div>
+
+      <div id="start-screen" class="hidden">
+        <div class="start-content">
+          <h2 class="start-title">Choose a View</h2>
+          <p class="start-subtitle">281 hazards &middot; 1,648 causal links &middot; 8 types</p>
+          <div class="start-cards">
+            <button class="start-card" data-view="web">
+              <svg class="start-icon" viewBox="0 0 120 120" aria-hidden="true">
+                <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border)" stroke-width="1.5"/>
+                <circle cx="60" cy="60" r="35" fill="none" stroke="var(--border)" stroke-width="1" opacity="0.5"/>
+                <circle cx="60" cy="10" r="4" fill="var(--accent)"/>
+                <circle cx="103" cy="35" r="4" fill="#e57373"/>
+                <circle cx="103" cy="85" r="4" fill="#81c784"/>
+                <circle cx="60" cy="110" r="4" fill="#ffb74d"/>
+                <circle cx="17" cy="85" r="4" fill="#ba68c8"/>
+                <circle cx="17" cy="35" r="4" fill="#4dd0e1"/>
+                <path d="M60,10 Q60,60 103,35" fill="none" stroke="var(--accent)" stroke-width="1" opacity="0.4"/>
+                <path d="M60,10 Q60,60 17,85" fill="none" stroke="var(--accent)" stroke-width="1" opacity="0.4"/>
+                <path d="M103,35 Q60,60 60,110" fill="none" stroke="#e57373" stroke-width="1" opacity="0.4"/>
+                <path d="M103,85 Q60,60 17,35" fill="none" stroke="#81c784" stroke-width="1" opacity="0.4"/>
+                <path d="M17,85 Q60,60 103,85" fill="none" stroke="#ba68c8" stroke-width="1" opacity="0.4"/>
+                <path d="M17,35 Q60,60 60,110" fill="none" stroke="#4dd0e1" stroke-width="1" opacity="0.4"/>
+              </svg>
+              <span class="start-card-name">The Web</span>
+              <span class="start-card-desc">Radial diagram of all hazard connections</span>
+            </button>
+            <button class="start-card" data-view="cascade">
+              <svg class="start-icon" viewBox="0 0 120 120" aria-hidden="true">
+                <circle cx="60" cy="60" r="6" fill="var(--accent)"/>
+                <line x1="54" y1="60" x2="25" y2="30" stroke="#42A5F5" stroke-width="1.5" opacity="0.6"/>
+                <line x1="54" y1="60" x2="25" y2="60" stroke="#42A5F5" stroke-width="1.5" opacity="0.6"/>
+                <line x1="54" y1="60" x2="25" y2="90" stroke="#42A5F5" stroke-width="1.5" opacity="0.6"/>
+                <circle cx="25" cy="30" r="4" fill="#42A5F5"/>
+                <circle cx="25" cy="60" r="4" fill="#42A5F5"/>
+                <circle cx="25" cy="90" r="4" fill="#42A5F5"/>
+                <line x1="66" y1="60" x2="95" y2="25" stroke="#FF5722" stroke-width="1.5" opacity="0.6"/>
+                <line x1="66" y1="60" x2="95" y2="50" stroke="#FF5722" stroke-width="1.5" opacity="0.6"/>
+                <line x1="66" y1="60" x2="95" y2="75" stroke="#FF5722" stroke-width="1.5" opacity="0.6"/>
+                <line x1="66" y1="60" x2="95" y2="100" stroke="#FF5722" stroke-width="1.5" opacity="0.6"/>
+                <circle cx="95" cy="25" r="4" fill="#FF5722"/>
+                <circle cx="95" cy="50" r="4" fill="#FF5722"/>
+                <circle cx="95" cy="75" r="4" fill="#FF5722"/>
+                <circle cx="95" cy="100" r="4" fill="#FF5722"/>
+              </svg>
+              <span class="start-card-name">Cascade</span>
+              <span class="start-card-desc">Explore cause-and-effect chains from any hazard</span>
+            </button>
+          </div>
+          <div class="start-about">
+            <h3>About</h3>
+            <p>A network visualization of the <strong>Hazard Information Profiles (HIPs)</strong> from
+            UNDRR and the International Science Council. Shows 281 hazards across 8 types
+            and the causal links between them.</p>
+            <h3>How to use</h3>
+            <ul>
+              <li><strong>The Web</strong> shows all hazards on a radial ring with bundled causal edges. Adjust the tension slider to see macro patterns (tight) or individual connections (loose).</li>
+              <li><strong>Cascade</strong> shows a bidirectional causal chain tree for any selected hazard.</li>
+              <li>Click a node to see its profile and causal connections</li>
+              <li>Search by hazard name, alternate label, or identifier</li>
+              <li>Filter by hazard type using the sidebar checkboxes</li>
+              <li>Use the Insights and Flow Matrix panels for aggregate analysis</li>
+            </ul>
+            <h3>Data &amp; Attribution</h3>
+            <p>Hazard data from the
+            <a href="https://www.preventionweb.net/drr-glossary/hips" target="_blank" rel="noopener">UNDRR/ISC Hazard Information Profiles</a>,
+            licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.
+            Source code on <a href="https://github.com/khawkins98/hips-multihazard" target="_blank" rel="noopener">GitHub</a>.</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <aside id="detail-panel" aria-label="Hazard details">
@@ -125,14 +195,6 @@
     <span>Data from <a href="https://www.preventionweb.net/drr-glossary/hips" target="_blank" rel="noopener">UNDRR/ISC Hazard Information Profiles</a> &middot; CC BY 4.0</span>
     <span id="snapshot-info"></span>
   </footer>
-
-  <div id="about-panel" class="about-panel">
-    <div class="about-panel-titlebar" id="about-titlebar">
-      <span class="about-panel-title">About</span>
-      <button class="about-panel-close" id="about-panel-close">&times;</button>
-    </div>
-    <div class="about-panel-body" id="about-body"></div>
-  </div>
 
   <div id="flow-panel" class="flow-panel hidden">
     <div class="flow-panel-titlebar" id="flow-titlebar">

@@ -35,7 +35,9 @@ export function initPathFinder(bus, getCy) {
     toggleBtn.classList.toggle('active', pathfinderActive);
     bus.emit('pathfinder:mode', { active: pathfinderActive });
 
-    if (!pathfinderActive) {
+    if (pathfinderActive) {
+      status.textContent = 'Click a source node…';
+    } else {
       resetState();
       bus.emit('pathfinder:clear', {});
     }

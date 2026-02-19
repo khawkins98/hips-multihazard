@@ -71,9 +71,8 @@ function isCorsOrNetworkError(err) {
  * Load HIPs hazard data. Priority:
  *   1. localStorage cache (if < 1 hour old)
  *   2. Live API (freshest data, 8s timeout)
- *   3. Static snapshot (bundled static file, always available)
+ *   3. Static snapshot (same-origin file, always available)
  *   4. Stale localStorage cache (any age)
- *   5. Bundled snapshot (baked into JS at build time)
  * @returns {Promise<{meta: Object, nodes: Array, edges: Array, _source: string}>} Normalized hazard dataset
  */
 export async function fetchHipsData() {
@@ -130,19 +129,6 @@ export async function fetchHipsData() {
     console.warn('Using stale cached data as fallback');
     stale._source = 'stale-cache';
     return stale;
-  }
-
-  // 5. Last resort: bundled snapshot (baked into JS at build time)
-  try {
-    const bundled = await import('./hips-snapshot.json');
-    const data = bundled.default || bundled;
-    validateData(data);
-    console.warn('Using bundled snapshot as last-resort fallback');
-    writeCache(data);
-    data._source = 'bundled';
-    return data;
-  } catch (importErr) {
-    console.warn('Bundled snapshot also failed:', importErr.message);
   }
 
   throw new Error(

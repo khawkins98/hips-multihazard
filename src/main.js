@@ -92,7 +92,7 @@ async function main() {
           : `${Math.floor(ageMins / 60)}h ${ageMins % 60}m ago`;
         sourceLabel = `Cached ${ageStr}`;
       } else {
-        const labels = { snapshot: 'Snapshot', api: 'Live API', bundled: 'Bundled' };
+        const labels = { snapshot: 'Snapshot', api: 'Live API' };
         sourceLabel = labels[data._source] || 'Snapshot';
       }
       info.textContent = `${data.meta.nodeCount || data.nodes.length} hazards · Data: ${date} (${sourceLabel})`;

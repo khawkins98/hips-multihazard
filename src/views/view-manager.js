@@ -44,6 +44,9 @@ export function createViewManager(container, data, bus) {
           views.cascade = mod.createCascadeView(container, data, bus);
           views.cascade.activate(opts);
           cascadeModule = mod;
+        }).catch(() => {
+          // Stale cached entry point referencing old chunk hash — reload to get fresh HTML
+          window.location.reload();
         });
       } else {
         views.cascade.activate(opts);

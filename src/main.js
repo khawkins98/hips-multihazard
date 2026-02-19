@@ -76,11 +76,16 @@ async function main() {
       });
     }
 
-    // 7. Update footer with snapshot info
+    // 7. Update footer with snapshot info and data freshness
     const info = document.getElementById('snapshot-info');
     if (data.meta) {
       const date = data.meta.fetchedAt ? new Date(data.meta.fetchedAt).toLocaleDateString() : 'unknown';
-      info.textContent = `${data.meta.nodeCount || data.nodes.length} hazards · Snapshot: ${date}`;
+      const sourceLabels = {
+        cache: 'Cached', snapshot: 'Snapshot', api: 'Live API',
+        'stale-cache': 'Stale cache', bundled: 'Bundled',
+      };
+      const sourceLabel = sourceLabels[data._source] || 'Snapshot';
+      info.textContent = `${data.meta.nodeCount || data.nodes.length} hazards · Data: ${date} (${sourceLabel})`;
     }
 
     // 8. Decide: start screen or direct load

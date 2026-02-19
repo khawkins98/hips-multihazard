@@ -72,13 +72,14 @@ function isCorsOrNetworkError(err) {
  *   1. localStorage cache (if < 1 hour old)
  *   2. Local snapshot (bundled static file)
  *   3. Live API (with CORS fallback to stale cache or snapshot)
- * @returns {Promise<{meta: Object, nodes: Array, edges: Array}>} Normalized hazard dataset
+ * @returns {Promise<{meta: Object, nodes: Array, edges: Array, _source: string}>} Normalized hazard dataset
  */
 export async function fetchHipsData() {
   // 1. Try localStorage cache
   const cached = readCache();
   if (cached) {
     console.log(`Using cached data: ${cached.nodes.length} nodes (${cached.meta?.source || 'cache'})`);
+    cached._source = 'cache';
     return cached;
   }
 
@@ -93,6 +94,7 @@ export async function fetchHipsData() {
         snapshotData = data;
         console.log(`Loaded snapshot: ${data.nodes.length} nodes, ${data.edges.length} edges`);
         writeCache(data);
+        data._source = 'snapshot';
         return data;
       }
     }
@@ -109,6 +111,7 @@ export async function fetchHipsData() {
     const result = transformRawApi(raw);
     validateData(result);
     writeCache(result);
+    result._source = 'api';
     return result;
   } catch (e) {
     if (isCorsOrNetworkError(e)) {
@@ -118,12 +121,16 @@ export async function fetchHipsData() {
     }
 
     // 4. Return snapshot if we partially loaded one
-    if (snapshotData) return snapshotData;
+    if (snapshotData) {
+      snapshotData._source = 'snapshot';
+      return snapshotData;
+    }
 
     // 5. Try stale localStorage cache
     const stale = readStaleCache();
     if (stale) {
       console.warn('Using stale cached data as fallback');
+      stale._source = 'stale-cache';
       return stale;
     }
 
@@ -134,6 +141,7 @@ export async function fetchHipsData() {
       validateData(data);
       console.warn('Using bundled snapshot as last-resort fallback');
       writeCache(data);
+      data._source = 'bundled';
       return data;
     } catch (importErr) {
       console.warn('Bundled snapshot also failed:', importErr.message);

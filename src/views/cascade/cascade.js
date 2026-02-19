@@ -8,6 +8,7 @@ import { renderCascade } from './cascade-render.js';
 import { DEFAULT_DEPTH, MAX_DEPTH } from './constants.js';
 import { getTypeDef } from '../../data/hazard-types.js';
 import { esc } from '../../utils/dom.js';
+import { isPathfinderActive } from '../../ui/path-finder.js';
 
 /**
  * Pick suggested hazards for the empty state: most connected, diverse across types.
@@ -132,7 +133,13 @@ export function createCascadeView(container, data, bus) {
       chip.style.setProperty('--chip-color', s.color);
       chip.innerHTML = `<span class="chip-dot" style="background:${esc(s.color)}"></span>${esc(s.label)}`;
       chip.title = `${s.typeName} — ${s.effects} effects, ${s.triggers} triggers`;
-      chip.addEventListener('click', () => renderTree(s.id));
+      chip.addEventListener('click', () => {
+        if (isPathfinderActive()) {
+          bus.emit('pathfinder:select', { id: s.id, label: s.label });
+          return;
+        }
+        renderTree(s.id);
+      });
       wrap.appendChild(chip);
     }
   }
@@ -150,14 +157,29 @@ export function createCascadeView(container, data, bus) {
 
     renderer = renderCascade(svg, effectsTree, triggersTree, rootNode, {
       onNodeClick(id) {
+        if (isPathfinderActive()) {
+          const n = nodeById.get(id);
+          bus.emit('pathfinder:select', { id, label: n?.label || id });
+          return;
+        }
         renderTree(id);
         bus.emit('node:selected', { id });
       },
       onGhostClick(id) {
+        if (isPathfinderActive()) {
+          const n = nodeById.get(id);
+          bus.emit('pathfinder:select', { id, label: n?.label || id });
+          return;
+        }
         renderTree(id);
         bus.emit('node:selected', { id });
       },
       onExpand(id, direction) {
+        if (isPathfinderActive()) {
+          const n = nodeById.get(id);
+          bus.emit('pathfinder:select', { id, label: n?.label || id });
+          return;
+        }
         renderTree(id);
         bus.emit('node:selected', { id });
       },

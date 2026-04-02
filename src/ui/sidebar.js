@@ -68,7 +68,7 @@ function initTypeFilters(data, bus) {
 
     const swatch = document.createElement('span');
     swatch.className = 'type-swatch';
-    swatch.style.background = typeDef.color;
+    swatch.style.background = typeDef.border;
 
     const text = document.createTextNode(typeDef.short);
 
@@ -202,7 +202,7 @@ export function initCentralityRanking(bus) {
       const nodeData = currentNodeDataMap?.get(id);
       const label = nodeData?.label || id;
       const typeDef = getTypeDef(nodeData?.typeName);
-      const color = typeDef.color;
+      const color = typeDef.border;
       const rank = m[rankKey];
       const value = m[metricKey].toFixed(4);
       return `<li class="centrality-item" data-node-id="${esc(id)}">

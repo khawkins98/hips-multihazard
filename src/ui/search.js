@@ -45,7 +45,7 @@ export function initSearch(nodes, eventBus) {
       const typeDef = getTypeDef(node.typeName);
       return `
         <li data-index="${i}" data-node-id="${node.id}" role="option" id="search-result-${i}">
-          <span class="result-swatch" style="background:${typeDef.color}"></span>
+          <span class="result-swatch" style="background:${typeDef.border}"></span>
           <span class="result-label">${highlight(node.label, query)}</span>
           <span class="result-type">${typeDef.short}</span>
         </li>

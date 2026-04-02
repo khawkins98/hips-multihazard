@@ -25,7 +25,7 @@ export function initLegend(nodes, bus) {
 
       const swatch = document.createElement('span');
       swatch.className = 'legend-node';
-      swatch.style.background = def.color;
+      swatch.style.background = def.border;
 
       const label = document.createElement('span');
       label.textContent = def.short;

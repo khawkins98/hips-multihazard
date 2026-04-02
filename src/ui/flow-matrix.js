@@ -41,14 +41,14 @@ export function initFlowMatrix(data, bus) {
   // Header row with rotated labels
   tableHtml += '<tr><th class="flow-corner"></th>';
   for (let ci = 0; ci < typeNames.length; ci++) {
-    const color = getTypeDef(typeNames[ci]).color;
+    const color = getTypeDef(typeNames[ci]).border;
     tableHtml += `<th class="flow-col-header"><div class="flow-col-label"><span class="flow-swatch" style="background:${color}"></span>${esc(shortNames[ci])}</div></th>`;
   }
   tableHtml += '<th class="flow-total-header">Total</th></tr>';
 
   // Data rows
   for (let ri = 0; ri < typeNames.length; ri++) {
-    const color = getTypeDef(typeNames[ri]).color;
+    const color = getTypeDef(typeNames[ri]).border;
     tableHtml += `<tr><th class="flow-row-header"><span class="flow-swatch" style="background:${color}"></span>${esc(shortNames[ri])}</th>`;
     for (let ci = 0; ci < typeNames.length; ci++) {
       const val = matrix[ri][ci];

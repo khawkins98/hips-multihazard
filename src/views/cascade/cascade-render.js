@@ -76,7 +76,7 @@ export function renderCascade(svg, effectsTree, triggersTree, rootNode, callback
     .attr('width', NODE_WIDTH)
     .attr('height', NODE_HEIGHT)
     .attr('rx', NODE_HEIGHT / 2)
-    .attr('fill', typeDef.color)
+    .attr('fill', typeDef.border)
     .attr('opacity', 0.9)
     .attr('stroke', '#fff')
     .attr('stroke-width', 2);
@@ -156,7 +156,7 @@ function renderSubtree(g, root, className, direction, callbacks) {
     .attr('rx', NODE_HEIGHT / 2)
     .attr('fill', d => {
       const td = getTypeDef(d.data.typeName);
-      return td.color;
+      return td.border;
     })
     .attr('opacity', d => d.data.ghost ? 0.4 : 0.75)
     .attr('stroke', d => d.data.ghost ? 'var(--text-dim)' : 'transparent')

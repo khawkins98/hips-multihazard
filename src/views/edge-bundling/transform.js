@@ -76,7 +76,7 @@ export function buildHierarchy(data, hiddenTypes = new Set(), edgeOpts = { visib
         label: node.label,
         typeName,
         clusterName,
-        color: typeDef.color,
+        color: typeDef.border,
         connectionCount: connectionCount.get(node.id) || 0,
         identifier: node.identifier,
       }));
@@ -85,7 +85,7 @@ export function buildHierarchy(data, hiddenTypes = new Set(), edgeOpts = { visib
         name: `cluster:${typeName}:${clusterName}`,
         label: clusterName,
         typeName,
-        color: typeDef.color,
+        color: typeDef.border,
         children: hazardChildren,
       });
     }
@@ -94,7 +94,7 @@ export function buildHierarchy(data, hiddenTypes = new Set(), edgeOpts = { visib
       name: `type:${typeName}`,
       label: typeName,
       typeName,
-      color: typeDef.color,
+      color: typeDef.border,
       children: clusterChildren,
     });
   }

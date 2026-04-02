@@ -18,7 +18,7 @@ function getSuggestions(data, effectsIndex, triggersIndex) {
     id: n.id,
     label: n.label,
     typeName: n.typeName,
-    color: getTypeDef(n.typeName).color,
+    color: getTypeDef(n.typeName).border,
     effects: (effectsIndex.get(n.id) || []).length,
     triggers: (triggersIndex.get(n.id) || []).length,
     total: (effectsIndex.get(n.id) || []).length + (triggersIndex.get(n.id) || []).length,

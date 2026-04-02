@@ -35,7 +35,7 @@ export function transformToElements(data, grouping = 'type') {
           label: name,
           isCompound: true,
           compoundType: 'type',
-          color: typeDef.color,
+          color: typeDef.border,
         },
       });
     }
@@ -79,7 +79,7 @@ export function transformToElements(data, grouping = 'type') {
         id: node.id,
         label: node.label,
         parent,
-        color: typeDef.color,
+        color: typeDef.border,
         typeName: node.typeName || 'Unknown',
         clusterName: node.clusterName || '',
         connectionCount,

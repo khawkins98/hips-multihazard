@@ -26,9 +26,32 @@ npm run snapshot   # refresh public/data/hips.json from PreventionWeb API
 npm run dev        # Vite dev server at http://localhost:5173/hips-multihazard/
 npm run build      # production build -> dist/
 npm run preview    # preview production build locally
+npm test           # run Vitest unit tests
 ```
 
-No test framework or linter is configured. Before opening a PR, please verify your change against both views and the main interactive features:
+## Test-driven development
+
+This project uses test-driven development. The expectation is:
+
+1. **Write or update tests first.** Before implementing a fix or feature, add a test that describes the expected behaviour and confirm it fails.
+2. **Make it pass.** Implement the minimum change needed to make the test green.
+3. **Refactor.** Clean up with confidence — the tests will catch regressions.
+
+Test files live alongside their source module as `*.test.js` (e.g. `src/utils/jsonld.test.js`). The test environment defaults to `node`; add `// @vitest-environment jsdom` at the top of any file that needs DOM APIs.
+
+Run the suite at any time:
+
+```bash
+npm test
+```
+
+CI runs `npm test` on every PR and push to `main`. A PR with failing tests will not be merged.
+
+If your change touches logic that isn't yet covered — data transforms, fetch fallback behaviour, utility helpers — add tests for it. Visual rendering code (Canvas, SVG layout) is exempt from the unit-test requirement, but pure functions extracted from it are not.
+
+---
+
+Before opening a PR, run `npm test` and verify your change against both views and the main interactive features:
 
 - **The Web** view (default) — hover hazards, hover type arcs, adjust the tension slider, toggle edges, filter by type, toggle declared-only
 - **Cascade** view — select a hazard, expand left (causes) and right (effects), verify cycles render as ghost nodes
@@ -51,6 +74,66 @@ See [CLAUDE.md](CLAUDE.md) for the full architecture overview, and [docs/hips_mu
 - `scripts/snapshot.js` — build-time data fetch
 
 The [declared vs inferred](docs/methodology-causal-asymmetry.md) distinction matters throughout — if your change touches edges, filters, or counts, consider both modes.
+
+## Releases
+
+Releases are cut from `main` after one or more related PRs have been merged. Not every merge needs a release — batch related changes together when it makes sense.
+
+### Versioning
+
+This project uses [Semantic Versioning](https://semver.org/):
+
+| Change type | Version bump |
+|---|---|
+| Breaking change to URL state, data format, or public API | Major (`x.0.0`) |
+| New view, new tool panel, or significant new capability | Minor (`x.y.0`) |
+| Bug fix, visual polish, dependency update, docs | Patch (`x.y.z`) |
+
+### Cutting a release
+
+1. On `main`, bump the version in `package.json` and create a git tag in one step:
+   ```bash
+   npm version patch   # or minor / major
+   git push origin main --follow-tags
+   ```
+2. Go to **GitHub → Releases → Draft a new release**, select the tag just pushed, and write the release notes (see style guide below).
+3. Publish. The deploy workflow fires automatically on the `main` push; the release is documentation only.
+
+### Release notes style
+
+Release notes should describe **what changed and why** in plain language — not a list of commit messages. A reader who hasn't followed the PRs should understand what's new and whether it affects them.
+
+**Patch release** — concise bullet list under `## What's changed`:
+
+```markdown
+## What's changed
+
+- **Brief headline**: One sentence explaining the change and its impact.
+- **Another fix**: Same pattern — bold label, plain-English description.
+```
+
+**Minor or major release** — narrative prose grouped by feature area, with a screenshot for any visual change and a `Full Changelog` link at the end:
+
+```markdown
+<screenshot or gif of the most significant change>
+
+### Feature area heading
+
+Two or three sentences explaining what this area does now and why it matters.
+Use prose, not bullets, unless you're listing genuinely enumerable things (e.g. a
+fallback priority chain).
+
+### Another area
+
+...
+
+**Full Changelog**: https://github.com/khawkins98/hips-multihazard/compare/vPREV...vNEW
+```
+
+**Things to avoid in release notes:**
+- Raw commit messages or PR titles as bullets
+- Implementation details that don't affect users (e.g. "refactored X into Y module")
+- Version numbers of updated dependencies unless the update has a user-visible effect
 
 ## Pull requests
 

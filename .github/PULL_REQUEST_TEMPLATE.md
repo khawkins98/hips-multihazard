@@ -2,13 +2,22 @@
 
 <!-- What does this PR change, and why? -->
 
+## Tests
+
+<!-- This project uses TDD. For any logic change, tests should come first. -->
+
+- [ ] New or updated tests are included for this change
+- [ ] `npm test` passes locally
+
+<!-- If this change is purely visual (Canvas/SVG rendering) and unit tests don't apply, briefly explain why below. -->
+
 ## Screenshots / recordings
 
 <!-- For any visual or layout change, please include before/after. Drop images here or link to a gist. -->
 
 ## Views tested
 
-<!-- Which views / features did you verify? -->
+<!-- Which views / features did you verify manually? -->
 <!-- - [ ] The Web view (default) -->
 <!-- - [ ] Cascade view -->
 <!-- - [ ] Search -->
@@ -20,6 +29,7 @@
 
 ## Checklist
 
+- [ ] Tests written or updated before implementation (TDD)
 - [ ] No build artifacts (`dist/`) committed unless intentional
 - [ ] `public/data/hips.json` not hand-edited (use `npm run snapshot` for data refreshes)
 - [ ] PR scope is focused; unrelated cleanup is in a separate PR

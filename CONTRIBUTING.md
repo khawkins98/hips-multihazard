@@ -2,6 +2,10 @@
 
 Thanks for your interest in contributing. This project is an interactive visualization of the UNDRR-ISC Hazard Information Profiles (HIPs) — a radial edge-bundling "Web" view and a bidirectional "Cascade" explorer, plus research tools (centrality, shortest paths, flow matrix, insights).
 
+**[Live demo →](https://khawkins98.github.io/hips-multihazard/)**
+
+Not sure if something is in scope, or want to discuss an approach before writing code? Open an issue — questions welcome.
+
 ## Scope
 
 **In scope:**
@@ -22,22 +26,12 @@ A sibling project, [hips-multi-hazard-diagram](https://github.com/khawkins98/hip
 
 ```bash
 npm install
-npm run snapshot   # refresh public/data/hips.json from PreventionWeb API
 npm run dev        # Vite dev server at http://localhost:5173/hips-multihazard/
 npm run build      # production build -> dist/
 npm run preview    # preview production build locally
+npm test           # run Vitest unit tests
+npm run snapshot   # refresh public/data/hips.json (optional — the app ships with a bundled copy; only needed for the latest data)
 ```
-
-No test framework or linter is configured. Before opening a PR, please verify your change against both views and the main interactive features:
-
-- **The Web** view (default) — hover hazards, hover type arcs, adjust the tension slider, toggle edges, filter by type, toggle declared-only
-- **Cascade** view — select a hazard, expand left (causes) and right (effects), verify cycles render as ghost nodes
-- Search (by name, alternate label, identifier)
-- Detail panel (k-hop expansion, centrality metrics)
-- Floating tools (flow matrix, insights, path finder) — drag, resize, close
-- URL state — confirm shareable links restore view, selected node, filters
-
-Test at desktop width. Ultra-narrow layouts are not currently targeted.
 
 ## Architecture orientation
 
@@ -51,6 +45,43 @@ See [CLAUDE.md](CLAUDE.md) for the full architecture overview, and [docs/hips_mu
 - `scripts/snapshot.js` — build-time data fetch
 
 The [declared vs inferred](docs/methodology-causal-asymmetry.md) distinction matters throughout — if your change touches edges, filters, or counts, consider both modes.
+
+## Test-driven development
+
+This project uses test-driven development. The expectation is:
+
+1. **Write or update tests first.** Before implementing a fix or feature, add a test that describes the expected behaviour and confirm it fails.
+2. **Make it pass.** Implement the minimum change needed to make the test green.
+3. **Refactor.** Clean up with confidence — the tests will catch regressions.
+
+Test files live alongside their source module as `*.test.js` (e.g. `src/utils/jsonld.test.js`). The test environment defaults to `node`; add `// @vitest-environment jsdom` at the top of any file that needs DOM APIs.
+
+Run the suite at any time:
+
+```bash
+npm test
+```
+
+CI runs `npm test` on every PR and push to `main`. A PR with failing tests will not be merged.
+
+If your change touches logic that isn't yet covered — data transforms, fetch fallback behaviour, utility helpers — add tests for it. Visual rendering code (Canvas, SVG layout) is exempt from the unit-test requirement. If you extract a pure function from rendering code, write a test for that function. If you're unsure whether your change needs tests, mention it in the PR.
+
+### Pre-PR checklist
+
+Before opening a PR, run `npm test` and verify your change against both views and the main interactive features:
+
+- **The Web** view (default) — hover hazards, hover type arcs, adjust the tension slider, toggle edges, filter by type, toggle declared-only
+- **Cascade** view — select a hazard, expand left (causes) and right (effects), verify cycles render as ghost nodes
+- Search (by name, alternate label, identifier)
+- Detail panel (k-hop expansion, centrality metrics)
+- Floating tools (flow matrix, insights, path finder) — drag, resize, close
+- URL state — confirm shareable links restore view, selected node, filters
+
+Test at desktop width. Ultra-narrow layouts are not currently targeted.
+
+## Releases
+
+Releases are cut by the maintainer from `main`. See [RELEASING.md](RELEASING.md) for the versioning guide, step-by-step mechanics, and release notes style guide. If you think changes are ready for a release, mention it in the relevant PR or issue.
 
 ## Pull requests
 
@@ -80,4 +111,4 @@ Use GitHub Issues. Helpful things to include:
 - Screenshot or short recording for visual issues
 - Console errors, if any
 
-For suspected data issues (wrong causal relationship, outdated description), please link to the corresponding hazard on [undrr.org/hip/{CODE}](https://www.undrr.org/hip) — and note that the fix almost certainly needs to happen upstream.
+For suspected data issues (wrong causal relationship, outdated description), please link to the corresponding hazard at `https://www.undrr.org/hip/{CODE}` (substituting the actual hazard code) — and note that the fix almost certainly needs to happen upstream.

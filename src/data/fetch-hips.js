@@ -85,12 +85,12 @@ export async function fetchHipsData() {
   }
 
   // 2. Try live API first (freshest data, with timeout)
+  let apiTimeout;
   try {
     console.log('Fetching from live API...');
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    apiTimeout = setTimeout(() => controller.abort(), 8000);
     const res = await fetch(API_URL, { signal: controller.signal });
-    clearTimeout(timeout);
     if (!res.ok) throw new Error(`API returned ${res.status}`);
     const raw = await res.json();
     const result = transformRawApi(raw);
@@ -104,6 +104,8 @@ export async function fetchHipsData() {
     } else {
       console.warn('Live API failed:', e.message);
     }
+  } finally {
+    clearTimeout(apiTimeout);
   }
 
   // 3. Fall back to static snapshot

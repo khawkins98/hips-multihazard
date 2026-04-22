@@ -14,9 +14,11 @@ npm run dev          # Start Vite dev server (http://localhost:5173/hips-multiha
 npm run build        # Production build → dist/
 npm run preview      # Preview production build locally
 npm run snapshot     # Fetch latest data from PreventionWeb API → public/data/hips.json
+npm test             # Run Vitest unit tests
 ```
 
-No test framework or linter is configured.
+This project uses **test-driven development**. Write or update tests before implementing logic changes. Test files live alongside source as `*.test.js`. Environment defaults to `node`; use `// @vitest-environment jsdom` for DOM-dependent tests. Visual rendering code (Canvas, SVG) is exempt; pure functions extracted from it are not.
+
 
 ## Architecture
 

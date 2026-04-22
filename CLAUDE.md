@@ -58,6 +58,15 @@ These helpers are defined in `src/utils/jsonld.js` (shared by both `scripts/snap
 
 GitHub Pages via `.github/workflows/deploy.yml`. Triggers on push to `main`. Base path is `/hips-multihazard/` (set in `vite.config.js`).
 
+## License & attribution
+
+Two licenses in play — keep them straight when making changes:
+
+- **Viewer source code** (this repo): Apache License 2.0 (see `LICENSE`).
+- **HIP content** (bundled in `public/data/hips.json`, fetched from PreventionWeb, rendered in the UI): CC BY-NC 4.0, © UNDRR + ISC (see `NOTICE`). Required citation: UNDRR & ISC (2025), *UNDRR-ISC Hazard Information Profiles – 2025 Update*, DOI 10.24948/2025.05. This is **non-commercial** and requires attribution. Do not hand-edit the snapshot, strip attribution/citation, add the UNDRR logo, or imply UNDRR/ISC endorsement.
+
+Practical implication: features that commercialize the bundled dataset, strip attribution, or hand-edit HIP content are out of scope. Data refreshes happen via `npm run snapshot`.
+
 ## Conventions
 
 - All modules export init/create functions (e.g., `createViewManager`, `initSidebar`) called from `src/main.js`

@@ -30,7 +30,6 @@
 
 ## Checklist
 
-- [ ] Tests added or updated for this change
 - [ ] No build artifacts (`dist/`) committed unless intentional
 - [ ] `public/data/hips.json` not hand-edited (use `npm run snapshot` for data refreshes)
 - [ ] If snapshot format changed, called out explicitly with a fresh `npm run snapshot` result in the diff

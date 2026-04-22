@@ -2,6 +2,10 @@
 
 Thanks for your interest in contributing. This project is an interactive visualization of the UNDRR-ISC Hazard Information Profiles (HIPs) — a radial edge-bundling "Web" view and a bidirectional "Cascade" explorer, plus research tools (centrality, shortest paths, flow matrix, insights).
 
+**[Live demo →](https://khawkins98.github.io/hips-multihazard/)**
+
+Not sure if something is in scope, or want to discuss an approach before writing code? Open an issue — questions welcome.
+
 ## Scope
 
 **In scope:**
@@ -22,12 +26,25 @@ A sibling project, [hips-multi-hazard-diagram](https://github.com/khawkins98/hip
 
 ```bash
 npm install
-npm run snapshot   # refresh public/data/hips.json from PreventionWeb API
 npm run dev        # Vite dev server at http://localhost:5173/hips-multihazard/
 npm run build      # production build -> dist/
 npm run preview    # preview production build locally
 npm test           # run Vitest unit tests
+npm run snapshot   # refresh public/data/hips.json (optional — the app ships with a bundled copy; only needed for the latest data)
 ```
+
+## Architecture orientation
+
+See [CLAUDE.md](CLAUDE.md) for the full architecture overview, and [docs/hips_multihazard_architecture.md](docs/hips_multihazard_architecture.md) for deeper notes. Key shape:
+
+- `src/main.js` — init order and event bus wiring
+- `src/data/` — fetch + fallback chain, JSON-LD transforms, centrality, flow matrix, insights
+- `src/views/edge-bundling/` — "The Web" (canvas edges + SVG overlay)
+- `src/views/cascade/` — cascade tree view
+- `src/ui/` — sidebar, detail panel, search, toolbar, legend, floating panels
+- `scripts/snapshot.js` — build-time data fetch
+
+The [declared vs inferred](docs/methodology-causal-asymmetry.md) distinction matters throughout — if your change touches edges, filters, or counts, consider both modes.
 
 ## Test-driven development
 
@@ -47,9 +64,9 @@ npm test
 
 CI runs `npm test` on every PR and push to `main`. A PR with failing tests will not be merged.
 
-If your change touches logic that isn't yet covered — data transforms, fetch fallback behaviour, utility helpers — add tests for it. Visual rendering code (Canvas, SVG layout) is exempt from the unit-test requirement, but pure functions extracted from it are not.
+If your change touches logic that isn't yet covered — data transforms, fetch fallback behaviour, utility helpers — add tests for it. Visual rendering code (Canvas, SVG layout) is exempt from the unit-test requirement. If you extract a pure function from rendering code, write a test for that function. If you're unsure whether your change needs tests, mention it in the PR.
 
----
+### Pre-PR checklist
 
 Before opening a PR, run `npm test` and verify your change against both views and the main interactive features:
 
@@ -62,78 +79,9 @@ Before opening a PR, run `npm test` and verify your change against both views an
 
 Test at desktop width. Ultra-narrow layouts are not currently targeted.
 
-## Architecture orientation
-
-See [CLAUDE.md](CLAUDE.md) for the full architecture overview, and [docs/hips_multihazard_architecture.md](docs/hips_multihazard_architecture.md) for deeper notes. Key shape:
-
-- `src/main.js` — init order and event bus wiring
-- `src/data/` — fetch + fallback chain, JSON-LD transforms, centrality, flow matrix, insights
-- `src/views/edge-bundling/` — "The Web" (canvas edges + SVG overlay)
-- `src/views/cascade/` — cascade tree view
-- `src/ui/` — sidebar, detail panel, search, toolbar, legend, floating panels
-- `scripts/snapshot.js` — build-time data fetch
-
-The [declared vs inferred](docs/methodology-causal-asymmetry.md) distinction matters throughout — if your change touches edges, filters, or counts, consider both modes.
-
 ## Releases
 
-Releases are cut from `main` after one or more related PRs have been merged. Not every merge needs a release — batch related changes together when it makes sense.
-
-### Versioning
-
-This project uses [Semantic Versioning](https://semver.org/):
-
-| Change type | Version bump |
-|---|---|
-| Breaking change to URL state, data format, or public API | Major (`x.0.0`) |
-| New view, new tool panel, or significant new capability | Minor (`x.y.0`) |
-| Bug fix, visual polish, dependency update, docs | Patch (`x.y.z`) |
-
-### Cutting a release
-
-1. On `main`, bump the version in `package.json` and create a git tag in one step:
-   ```bash
-   npm version patch   # or minor / major
-   git push origin main --follow-tags
-   ```
-2. Go to **GitHub → Releases → Draft a new release**, select the tag just pushed, and write the release notes (see style guide below).
-3. Publish. The deploy workflow fires automatically on the `main` push; the release is documentation only.
-
-### Release notes style
-
-Release notes should describe **what changed and why** in plain language — not a list of commit messages. A reader who hasn't followed the PRs should understand what's new and whether it affects them.
-
-**Patch release** — concise bullet list under `## What's changed`:
-
-```markdown
-## What's changed
-
-- **Brief headline**: One sentence explaining the change and its impact.
-- **Another fix**: Same pattern — bold label, plain-English description.
-```
-
-**Minor or major release** — narrative prose grouped by feature area, with a screenshot for any visual change and a `Full Changelog` link at the end:
-
-```markdown
-<screenshot or gif of the most significant change>
-
-### Feature area heading
-
-Two or three sentences explaining what this area does now and why it matters.
-Use prose, not bullets, unless you're listing genuinely enumerable things (e.g. a
-fallback priority chain).
-
-### Another area
-
-...
-
-**Full Changelog**: https://github.com/khawkins98/hips-multihazard/compare/vPREV...vNEW
-```
-
-**Things to avoid in release notes:**
-- Raw commit messages or PR titles as bullets
-- Implementation details that don't affect users (e.g. "refactored X into Y module")
-- Version numbers of updated dependencies unless the update has a user-visible effect
+Releases are cut by the maintainer from `main`. See [RELEASING.md](RELEASING.md) for the versioning guide, step-by-step mechanics, and release notes style guide. If you think changes are ready for a release, mention it in the relevant PR or issue.
 
 ## Pull requests
 
@@ -163,4 +111,4 @@ Use GitHub Issues. Helpful things to include:
 - Screenshot or short recording for visual issues
 - Console errors, if any
 
-For suspected data issues (wrong causal relationship, outdated description), please link to the corresponding hazard on [undrr.org/hip/{CODE}](https://www.undrr.org/hip) — and note that the fix almost certainly needs to happen upstream.
+For suspected data issues (wrong causal relationship, outdated description), please link to the corresponding hazard at `https://www.undrr.org/hip/{CODE}` (substituting the actual hazard code) — and note that the fix almost certainly needs to happen upstream.

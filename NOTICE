@@ -1,10 +1,61 @@
 HIPs Multi-Hazard Explorer
-Copyright 2025 Keith Hawkins
+Copyright 2025 Ken Hawkins and contributors
 
-This product includes hazard data from the UNDRR/ISC Hazard Information
-Profiles (HIPs), published by the United Nations Office for Disaster Risk
-Reduction and the International Science Council.
-https://www.preventionweb.net/drr-glossary/hips
+This product includes software developed by Ken Hawkins and contributors,
+licensed under the Apache License, Version 2.0 (see LICENSE).
 
-The hazard data is subject to PreventionWeb terms of use:
-https://www.preventionweb.net/terms-and-conditions-use-preventionweb
+================================================================================
+Third-party data and content
+================================================================================
+
+This application includes a snapshot of hazard data (`public/data/hips.json`)
+fetched from the PreventionWeb API
+(https://www.preventionweb.net/api/terms/hips) and rendered in the UI. That
+data is drawn from the UNDRR-ISC Hazard Information Profiles (HIPs), which
+are the copyrighted work of their respective authors and are NOT covered by
+the Apache License above.
+
+The HIP content is made available by UNDRR and ISC under the Creative Commons
+Attribution-NonCommercial 4.0 International license (CC BY-NC 4.0):
+
+    https://creativecommons.org/licenses/by-nc/4.0/
+
+Required citation:
+
+    United Nations Office for Disaster Risk Reduction (UNDRR), &
+    International Science Council (ISC). (2025).
+    UNDRR-ISC Hazard Information Profiles - 2025 Update.
+    https://doi.org/10.24948/2025.05
+
+Classification methodology reference:
+
+    UNDRR-ISC Hazard Definition & Classification Review: 2025 Update of the
+    Technical Report. https://doi.org/10.24948/2025.04
+
+Key terms that apply to the HIP content (not to this project's source code):
+
+  - Non-commercial use only. The Apache 2.0 license on the viewer source
+    does NOT grant rights to use the bundled HIP data commercially. Anyone
+    deploying this application in a commercial context is responsible for
+    obtaining permission from UNDRR for the underlying content. Commercial
+    licensing requests should be directed to:
+    https://www.undrr.org/contact-us
+
+  - Attribution is required in any use of the content.
+
+  - No endorsement. Nothing in this project should be construed as UNDRR
+    or ISC endorsing this viewer, its author, or any organization deploying
+    it. The UNDRR logo is not used and must not be added.
+
+  - Translations, if any, must carry the disclaimer required by UNDRR:
+    "This translation was not created by the United Nations Office for
+    Disaster Risk Reduction (UNDRR). UNDRR is not responsible for the
+    content or accuracy of this translation. The original English edition
+    shall be the authoritative edition."
+
+  - Disclaimer of liability for the HIP content rests with UNDRR/ISC as
+    stated in the source publication. The viewer itself is provided "AS IS"
+    under the Apache 2.0 terms in LICENSE.
+
+This project is not affiliated with, endorsed by, or sponsored by UNDRR,
+ISC, or PreventionWeb.

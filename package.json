@@ -3,6 +3,15 @@
   "version": "1.1.1",
   "description": "Interactive multi-hazard ontology visualization of UNDRR/ISC Hazard Information Profiles",
   "type": "module",
+  "author": "Ken Hawkins",
+  "homepage": "https://khawkins98.github.io/hips-multihazard/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khawkins98/hips-multihazard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/khawkins98/hips-multihazard/issues"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

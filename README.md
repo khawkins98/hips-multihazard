@@ -63,6 +63,8 @@ For example, TL0405 (Road Traffic Accident) has 24 declared connections (7 cause
 
 ### Multi-hazard ontology and classification
 
+- UNDRR & ISC (2025). *UNDRR-ISC Hazard Information Profiles – 2025 Update.* United Nations Office for Disaster Risk Reduction & International Science Council. https://doi.org/10.24948/2025.05 — **primary data source for this project.**
+- UNDRR & ISC (2025). *UNDRR-ISC Hazard Definition & Classification Review: 2025 Update of the Technical Report.* https://doi.org/10.24948/2025.04
 - UNDRR/ISC (2020). *Hazard Definition and Classification Review: Technical Report.* United Nations Office for Disaster Risk Reduction & International Science Council. https://www.undrr.org/publication/hazard-definition-and-classification-review
 - Murray, V. et al. (2021). "Hazard Information Profiles: Supplement to UNDRR-ISC Hazard Definition & Classification Review." *UNDRR/ISC Technical Report.*
 - Tilloy, A., Malamud, B.D., Winter, H. & Joly-Laugel, A. (2019). "A review of quantification methodologies for multi-hazard interrelationships." *Earth-Science Reviews*, 196, 102881.
@@ -77,12 +79,26 @@ For example, TL0405 (Road Traffic Accident) has 24 declared connections (7 cause
 - Miles, A. & Bechhofer, S. (2009). "SKOS Simple Knowledge Organization System Reference." *W3C Recommendation*. https://www.w3.org/TR/skos-reference/
 - Cotton, F., Kunz, M., Dottori, F. & Stocker, D. (2023). "Multi-hazard and systemic framework for risk-informed decision making." *EU Horizon Technical Report.*
 
-## Attribution
+## Contributing
 
-Data from UNDRR/ISC Hazard Information Profiles, [preventionweb.net](https://www.preventionweb.net/drr-glossary/hips), licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, scope, and PR guidelines.
 
-## License
+## License & attribution
 
-Apache 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
+Two licenses apply, and it is important to keep them distinct:
 
-Hazard data is sourced from UNDRR/ISC and subject to [PreventionWeb terms of use](https://www.preventionweb.net/terms-and-conditions-use-preventionweb).
+### Viewer source code
+
+The source code in this repository is licensed under the [Apache License, Version 2.0](LICENSE).
+
+### Hazard data (`public/data/hips.json` and runtime content)
+
+The hazard data bundled with this application and rendered in the UI is drawn from the UNDRR-ISC Hazard Information Profiles, published by UNDRR and ISC under [Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/). Required citation:
+
+> United Nations Office for Disaster Risk Reduction (UNDRR), & International Science Council (ISC). (2025). *UNDRR-ISC Hazard Information Profiles – 2025 Update.* <https://doi.org/10.24948/2025.05>
+
+**Non-commercial use only.** The Apache 2.0 license on the viewer source does *not* grant rights to use the bundled HIP data commercially. If you want to deploy this viewer in a commercial context, you are responsible for obtaining permission from UNDRR for the underlying content: <https://www.undrr.org/contact-us>.
+
+Attribution is required in any use of the content. No UNDRR/ISC endorsement of this viewer or its author is implied; the UNDRR logo is not used and must not be added. See [NOTICE](NOTICE) for the full third-party attribution and translation-disclaimer terms.
+
+This is a personal project developed by an UNDRR staff member in an individual capacity — it is not an official UNDRR, ISC, or PreventionWeb product, and is not affiliated with, endorsed by, or sponsored by any of them.

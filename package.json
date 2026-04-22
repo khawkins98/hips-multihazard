@@ -13,7 +13,7 @@
     "url": "https://github.com/khawkins98/hips-multihazard/issues"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "scripts": {
     "dev": "vite",

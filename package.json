@@ -1,6 +1,6 @@
 {
   "name": "hips-multihazard",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Interactive multi-hazard ontology visualization of UNDRR/ISC Hazard Information Profiles",
   "type": "module",
   "author": "Ken Hawkins",

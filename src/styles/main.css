@@ -261,6 +261,53 @@ button:active {
   color: var(--success-color);
 }
 
+/* Header GitHub link styled as a button */
+.btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  line-height: 1;
+  text-decoration: none;
+  color: var(--text);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.btn-link:hover {
+  background: #2e3347;
+  border-color: var(--text-muted);
+  color: var(--text);
+  text-decoration: none;
+}
+.btn-link svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Footer: right side groups snapshot info and source link */
+#app-footer .footer-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+#app-footer .footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-muted);
+}
+#app-footer .footer-link:hover {
+  color: var(--accent-hover);
+  text-decoration: none;
+}
+#app-footer .footer-link svg {
+  display: block;
+  flex-shrink: 0;
+}
+
 /* Hyper-route floating labels */
 .hyper-route-label {
   position: absolute;

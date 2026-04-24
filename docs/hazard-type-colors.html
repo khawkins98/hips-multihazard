@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>HIPs Hazard Type Colors</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --panel: #ffffff;
+      --text: #1a1d24;
+      --muted: #5a6373;
+      --border: #d0d4dc;
+    }
+    @media print {
+      body { padding: 0.5in; }
+      .card, .preview-row, table { break-inside: avoid; }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    h1 { margin: 0 0 0.25rem; font-size: 1.5rem; }
+    .sub { color: var(--muted); margin: 0 0 2rem; }
+    .sub code {
+      background: var(--panel);
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .swatch {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111;
+    }
+    .meta {
+      padding: 0.75rem 1.25rem;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.25rem 0.75rem;
+      align-items: center;
+    }
+    .meta .label { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .meta .val { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; }
+    .chip {
+      width: 16px; height: 16px; border-radius: 3px;
+      border: 1px solid rgba(0,0,0,0.12);
+    }
+    .preview-row {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+    }
+    h2 { font-size: 1.1rem; margin: 2rem 0 0.75rem; }
+    .legend-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.7rem 0.35rem 0.5rem;
+      border-radius: 999px;
+      border: 2px solid;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #111;
+    }
+    .node-demo {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: center;
+      padding: 1.25rem;
+    }
+    .node {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: 3px solid;
+      display: inline-block;
+    }
+    .bar-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .bar {
+      display: flex;
+      align-items: center;
+      padding: 0.6rem 1rem;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .bar .count {
+      font-variant-numeric: tabular-nums;
+      opacity: 0.85;
+      margin-right: 0.75rem;
+      min-width: 2ch;
+      text-align: right;
+    }
+    .bar .hex {
+      margin-left: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0;
+      text-transform: none;
+      opacity: 0.85;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 0.6rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.85rem;
+    }
+    th {
+      background: #eef0f4;
+      font-family: inherit;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+    tr:last-child td { border-bottom: none; }
+    footer {
+      margin-top: 2.5rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>HIPs Hazard Type Colors</h1>
+  <p class="sub">
+    Reference palette for the 8 UNDRR Hazard Information Profile types, plus the unmapped fallback.
+    Source of truth: <code>src/data/hazard-types.js</code>.
+    Each type has a <strong>solid</strong> (matches the UNDRR-ISC 2025 Update print style — full-bleed bars with white text),
+    a <strong>border</strong> (saturated, used for outlines/strokes on screen), and a <strong>bg</strong> (tinted, used for fills on light surfaces).
+  </p>
+
+  <div class="grid" id="grid"></div>
+
+  <h2>Solid bars (UNDRR print style)</h2>
+  <div class="preview-row">
+    <div class="bar-stack" id="bars"></div>
+  </div>
+
+  <h2>Pills (border + bg, legend style)</h2>
+  <div class="preview-row">
+    <div class="legend-row" id="pills"></div>
+  </div>
+
+  <h2>Nodes (graph style — border stroke on bg fill)</h2>
+  <div class="preview-row">
+    <div class="node-demo" id="nodes"></div>
+  </div>
+
+  <h2>Tokens</h2>
+  <table>
+    <thead>
+      <tr><th>Type</th><th>Solid</th><th>Border</th><th>Background</th><th>Short</th></tr>
+    </thead>
+    <tbody id="tokens"></tbody>
+  </table>
+
+  <footer>
+    Generated from <code>src/data/hazard-types.js</code>. Edit that file to change the palette.
+  </footer>
+
+  <script type="module">
+    const HAZARD_TYPES = {
+      'Biological':                     { solid: '#000000', border: '#808080', bg: '#E8E8E8', short: 'Biological' },
+      'Meteorological and Hydrological':{ solid: '#3AAE2B', border: '#3AAE2B', bg: '#E8F5E5', short: 'Met/Hydro' },
+      'Technological':                  { solid: '#B8860B', border: '#B8860B', bg: '#F5EDD6', short: 'Technological' },
+      'Chemical':                       { solid: '#5B92C5', border: '#5B92C5', bg: '#ECF2F9', short: 'Chemical' },
+      'Geological':                     { solid: '#C21E2C', border: '#C21E2C', bg: '#F9E6E8', short: 'Geological' },
+      'Environmental':                  { solid: '#1B355F', border: '#1B355F', bg: '#E3E8EF', short: 'Environmental' },
+      'Extraterrestrial':               { solid: '#E8792B', border: '#E8792B', bg: '#FCF0E8', short: 'Extraterrestrial' },
+      'Societal':                       { solid: '#8B3FA0', border: '#8B3FA0', bg: '#F2E8F6', short: 'Societal' },
+    };
+    const DEFAULT_TYPE = { solid: '#9E9E9E', border: '#9E9E9E', bg: '#F5F5F5', short: 'Unknown' };
+
+    const entries = [...Object.entries(HAZARD_TYPES), ['Default (unmapped)', DEFAULT_TYPE]];
+
+    const grid = document.getElementById('grid');
+    const bars = document.getElementById('bars');
+    const pills = document.getElementById('pills');
+    const nodes = document.getElementById('nodes');
+    const tokens = document.getElementById('tokens');
+
+    for (const [name, def] of entries) {
+      // card
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="swatch" style="background:${def.solid}; color:#fff; border-bottom: none;">
+          <span>${name}</span>
+        </div>
+        <div class="meta">
+          <span class="chip" style="background:${def.solid}"></span>
+          <span class="label">Solid</span>
+          <span class="val">${def.solid}</span>
+
+          <span class="chip" style="background:${def.border}"></span>
+          <span class="label">Border</span>
+          <span class="val">${def.border}</span>
+
+          <span class="chip" style="background:${def.bg}"></span>
+          <span class="label">Background</span>
+          <span class="val">${def.bg}</span>
+        </div>
+      `;
+      grid.appendChild(card);
+
+      // solid bar (UNDRR print style)
+      const bar = document.createElement('div');
+      bar.className = 'bar';
+      bar.style.background = def.solid;
+      bar.innerHTML = `<span>${name}</span><span class="hex">${def.solid}</span>`;
+      bars.appendChild(bar);
+
+      // pill
+      const pill = document.createElement('span');
+      pill.className = 'pill';
+      pill.style.background = def.bg;
+      pill.style.borderColor = def.border;
+      pill.innerHTML = `<span>${def.short}</span>`;
+      pills.appendChild(pill);
+
+      // node
+      const node = document.createElement('span');
+      node.className = 'node';
+      node.title = name;
+      node.style.background = def.bg;
+      node.style.borderColor = def.border;
+      nodes.appendChild(node);
+
+      // table row
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${name}</td>
+        <td><span class="chip" style="display:inline-block;vertical-align:middle;margin-right:0.5rem;background:${def.solid}"></span>${def.solid}</td>
+        <td><span class="chip" style="display:inline-block;vertical-align:middle;margin-right:0.5rem;background:${def.border}"></span>${def.border}</td>
+        <td><span class="chip" style="display:inline-block;vertical-align:middle;margin-right:0.5rem;background:${def.bg}"></span>${def.bg}</td>
+        <td>${def.short}</td>
+      `;
+      tokens.appendChild(row);
+    }
+  </script>
+</body>
+</html>

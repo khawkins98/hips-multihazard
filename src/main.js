@@ -18,6 +18,7 @@ import { initInsights } from './ui/insights.js';
 import { computeCentrality } from './data/centrality.js';
 import { initPathFinder } from './ui/path-finder.js';
 import { initFlowMatrix } from './ui/flow-matrix.js';
+import { formatSnapshotInfo } from './ui/snapshot-info.js';
 import { createBus } from './utils/bus.js';
 import { parseUrl, createUrlSync, applyUrlState } from './utils/url-state.js';
 
@@ -78,24 +79,8 @@ async function main() {
 
     // 7. Update footer with snapshot info and data freshness
     const info = document.getElementById('snapshot-info');
-    if (data.meta) {
-      const date = data.meta.fetchedAt
-        ? new Date(data.meta.fetchedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-        : 'unknown';
-      let sourceLabel;
-      if (data._source === 'cache' || data._source === 'stale-cache') {
-        const ts = parseInt(localStorage.getItem('hips-data-ts'), 10);
-        const ageMs = ts ? Date.now() - ts : 0;
-        const ageMins = Math.floor(ageMs / 60000);
-        const ageStr = ageMins < 1 ? 'just now'
-          : ageMins < 60 ? `${ageMins}m ago`
-          : `${Math.floor(ageMins / 60)}h ${ageMins % 60}m ago`;
-        sourceLabel = `Cached ${ageStr}`;
-      } else {
-        const labels = { snapshot: 'Snapshot', api: 'Live API' };
-        sourceLabel = labels[data._source] || 'Snapshot';
-      }
-      info.textContent = `${data.meta.nodeCount || data.nodes.length} hazards · Data: ${date} (${sourceLabel})`;
+    if (info && data.meta) {
+      info.textContent = formatSnapshotInfo(data);
     }
 
     // 8. Decide: start screen or direct load

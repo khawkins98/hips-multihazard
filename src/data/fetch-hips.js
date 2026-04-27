@@ -95,6 +95,7 @@ export async function fetchHipsData() {
     const raw = await res.json();
     const result = transformRawApi(raw);
     validateData(result);
+    result.meta = { ...result.meta, origin: 'api' };
     writeCache(result);
     result._source = 'api';
     return result;
@@ -116,6 +117,7 @@ export async function fetchHipsData() {
       if (data.nodes && data.edges) {
         validateData(data);
         console.log(`Loaded snapshot: ${data.nodes.length} nodes, ${data.edges.length} edges`);
+        data.meta = { ...data.meta, origin: 'snapshot' };
         writeCache(data);
         data._source = 'snapshot';
         return data;

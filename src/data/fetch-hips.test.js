@@ -117,6 +117,38 @@ describe('fetchHipsData() — live API', () => {
   });
 });
 
+describe('fetchHipsData() — origin marker', () => {
+  it('stamps meta.origin = "api" on a fresh API fetch', async () => {
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => API_RESPONSE,
+    });
+    vi.stubGlobal('fetch', fetchFn);
+    const result = await fetchHipsData();
+    expect(result.meta.origin).toBe('api');
+  });
+
+  it('stamps meta.origin = "snapshot" on snapshot fallback', async () => {
+    const fetchFn = vi.fn()
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce({ ok: true, json: async () => VALID_DATA });
+    vi.stubGlobal('fetch', fetchFn);
+    const result = await fetchHipsData();
+    expect(result.meta.origin).toBe('snapshot');
+  });
+
+  it('persists meta.origin into localStorage so cached reads keep provenance', async () => {
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => API_RESPONSE,
+    });
+    vi.stubGlobal('fetch', fetchFn);
+    await fetchHipsData();
+    const cached = JSON.parse(localStorage.getItem('hips-data'));
+    expect(cached.meta.origin).toBe('api');
+  });
+});
+
 describe('fetchHipsData() — stale cache fallback', () => {
   it('uses stale cache when all network sources fail', async () => {
     setStaleCache(VALID_DATA);

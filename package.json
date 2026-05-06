@@ -23,7 +23,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "cytoscape": "^3.33.2",
+    "cytoscape": "^3.33.3",
     "cytoscape-dagre": "^2.5.0",
     "cytoscape-fcose": "^2.2.0",
     "d3-hierarchy": "^3.1.2",

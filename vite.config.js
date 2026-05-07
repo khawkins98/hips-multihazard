@@ -11,8 +11,10 @@ export default defineConfig({
     assetsInlineLimit: 0,
     rollupOptions: {
       output: {
-        manualChunks: {
-          cytoscape: ['cytoscape'],
+        // Vite 8 / Rolldown only accepts the function form of manualChunks
+        // (the object form was Rollup-only).
+        manualChunks: (id) => {
+          if (id.includes('node_modules/cytoscape/')) return 'cytoscape';
         },
       },
     },
